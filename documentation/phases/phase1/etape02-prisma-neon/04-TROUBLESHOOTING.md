@@ -530,3 +530,4 @@ DEBUG=prisma:client npm run dev
 ```
 
 Si aucune de ces solutions ne fonctionne, documenter l'erreur exacte avec les logs complets pour obtenir de l'aide supplémentaire.
+
