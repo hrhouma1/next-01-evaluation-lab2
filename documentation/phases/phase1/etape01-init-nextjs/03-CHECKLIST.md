@@ -66,18 +66,38 @@
 
 **Durée** : 15-20 minutes
 
+## Dépannage Windows PowerShell
+
+### Commandes à connaître (Windows)
+
+- [ ] Savoir lister les processus Node.js : `Get-Process node`
+- [ ] Savoir tuer les processus bloqués : `Get-Process node | Stop-Process -Force`
+- [ ] Savoir vérifier le port 3000 : `netstat -ano | findstr :3000`
+- [ ] Savoir libérer le port automatiquement :
+  ```powershell
+  $port = 3000
+  Get-NetTCPConnection -LocalPort $port | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+  ```
+
 ## En cas de problème
 
 ### Erreurs courantes
 
 1. **Port 3000 occupé**
-   - Solution : `npm run dev -- -p 3001`
+   - Solution simple : `npm run dev -- -p 3001`
+   - Solution PowerShell : `Get-Process node | Stop-Process -Force`
 
-2. **Erreurs de cache npm**
+2. **Processus Node.js bloqué**
+   - Solution PowerShell : `Get-Process node | Stop-Process -Force`
+   - Puis : `npm run dev`
+
+3. **Erreurs de cache npm**
    - Solution : `npm cache clean --force`
+   - PowerShell : `Remove-Item -Recurse -Force node_modules; npm install`
 
-3. **Problèmes de permissions**
+4. **Problèmes de permissions**
    - Solution : Vérifier les droits du dossier
+   - Redémarrer PowerShell en tant qu'administrateur si nécessaire
 
 ### Support
 
@@ -93,3 +113,40 @@ Un projet Next.js 14 fonctionnel avec :
 - App Router activé
 - Structure src/ en place
 - Imports absolus avec @/
+
+## Annexe 2 : Commandes CMD (Command Prompt)
+
+### Alternative CMD aux commandes PowerShell
+
+Si vous préférez utiliser CMD :
+
+**Processus Node.js** :
+```cmd
+tasklist | findstr node                  → Voir processus Node.js
+tasklist /fi "imagename eq node.exe"     → Filtrer processus Node.js
+taskkill /f /im node.exe                 → Tuer tous processus Node.js
+taskkill /f /im node.exe /t              → Tuer avec processus enfants
+taskkill /f /im "node*"                  → Tuer tous processus node*
+wmic process where "name='node.exe'" delete → Alternative WMIC
+taskkill /f /pid [PID]                   → Tuer processus spécifique
+```
+
+**Port 3000** :
+```cmd
+netstat -ano | findstr :3000             → Vérifier port 3000
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000') do taskkill /f /pid %a  → Libérer port
+```
+
+**Nettoyage** :
+```cmd
+rmdir /s /q node_modules                 → Supprimer node_modules
+rmdir /s /q .next                        → Supprimer cache Next.js
+npm cache clean --force                  → Nettoyer cache npm
+```
+
+### Checklist CMD supplémentaire
+
+- [ ] Savoir lister les processus : `tasklist | findstr node`
+- [ ] Savoir tuer les processus : `taskkill /f /im node.exe`
+- [ ] Savoir vérifier le port : `netstat -ano | findstr :3000`
+- [ ] Savoir supprimer les dossiers : `rmdir /s /q node_modules`

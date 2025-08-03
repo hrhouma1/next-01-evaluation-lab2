@@ -290,11 +290,141 @@ Une fois cette étape terminée, vous pourrez passer à l'étape 2 : Configurati
 # Si erreur de permission
 npm cache clean --force
 ```
+# Annexe 1 : Commandes PowerShell (Windows)
+
+
 
 #### Port 3000 déjà utilisé
 ```bash
 # Utiliser un autre port
 npm run dev -- -p 3001
+```
+
+#### Arrêter le processus Node.js bloqué (Windows PowerShell)
+
+Si le serveur Next.js reste bloqué ou ne s'arrête pas avec `Ctrl+C` :
+
+```powershell
+# Voir tous les processus Node.js en cours
+Get-Process node
+
+# Tuer tous les processus Node.js
+Get-Process node | Stop-Process -Force
+
+# Ou tuer un processus spécifique par son ID (PID)
+Stop-Process -Id [PID] -Force
+
+# Libérer le port 3000 spécifiquement
+netstat -ano | findstr :3000
+# Puis tuer le processus avec le PID trouvé
+Stop-Process -Id [PID] -Force
+```
+
+**Alternative plus simple** :
+```powershell
+# Tuer directement tous les processus sur le port 3000
+$port = 3000
+Get-NetTCPConnection -LocalPort $port | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+```
+
+**Structure des commandes PowerShell** :
+```
+C:\path\to\photo-marketplace>  ← Votre terminal
+├── Get-Process node           ← Liste les processus
+├── Stop-Process -Id [PID]     ← Tue un processus spécifique  
+└── Stop-Process -Force        ← Force l'arrêt
+```
+
+## Annexe 2 : Commandes CMD (Command Prompt Windows)
+
+Si vous préférez utiliser CMD au lieu de PowerShell :
+
+### Gestion des processus Node.js (CMD)
+
+```cmd
+REM Voir tous les processus Node.js
+tasklist | findstr node
+tasklist /fi "imagename eq node.exe"
+
+REM Tuer tous les processus Node.js (plusieurs variantes)
+taskkill /f /im node.exe
+taskkill /f /im node.exe /t
+taskkill /f /im "node*"
+
+REM Alternative avec WMIC
+wmic process where "name='node.exe'" delete
+
+REM Tuer un processus spécifique par PID
+taskkill /f /pid [PID]
+
+REM Tuer tous les processus Node.js avec boucle robuste
+for /f "tokens=2 delims=," %i in ('tasklist /fi "imagename eq node.exe" /fo csv ^| findstr /v "PID"') do taskkill /f /pid %i
+
+REM Vérifier le port 3000
+netstat -ano | findstr :3000
+netstat -ano | findstr "LISTENING" | findstr :3000
+```
+
+### Libération du port 3000 (CMD)
+
+```cmd
+REM Trouver le processus qui utilise le port 3000
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000') do taskkill /f /pid %a
+
+REM Ou étape par étape :
+netstat -ano | findstr :3000
+taskkill /f /pid [PID_TROUVÉ]
+```
+
+### Nettoyage du projet (CMD)
+
+```cmd
+REM Nettoyer le cache npm
+npm cache clean --force
+
+REM Supprimer node_modules
+rmdir /s /q node_modules
+npm install
+
+REM Supprimer le cache Next.js
+rmdir /s /q .next
+npm run dev
+```
+
+**Structure des commandes CMD** :
+```
+C:\path\to\photo-marketplace>  ← Votre terminal CMD
+├── tasklist | findstr node   ← Liste les processus Node.js
+├── taskkill /f /im node.exe  ← Tue tous les processus Node.js
+├── taskkill /f /im node.exe /t ← Tue avec processus enfants
+├── wmic process where...      ← Alternative puissante WMIC
+└── netstat -ano | findstr    ← Vérifie les ports occupés
+```
+
+### Toutes les variantes de commandes disponibles
+
+**Pour lister les processus** :
+```cmd
+tasklist | findstr node                    ← Basique
+tasklist /fi "imagename eq node.exe"       ← Filtré
+tasklist /fi "imagename eq node.exe" /fo table ← Format tableau
+tasklist /fi "imagename eq node.exe" /fo csv   ← Format CSV
+```
+
+**Pour tuer les processus** :
+```cmd
+taskkill /f /im node.exe                   ← Basique
+taskkill /f /im node.exe /t                ← Avec processus enfants
+taskkill /f /im "node*"                    ← Tous les processus node*
+wmic process where "name='node.exe'" delete ← Alternative WMIC
+taskkill /f /pid [PID]                     ← Processus spécifique
+```
+
+**Pour vérifier les ports** :
+```cmd
+netstat -ano | findstr :3000              ← Port spécifique
+netstat -ano | findstr "LISTENING" | findstr :3000 ← Seulement en écoute
+netstat -ano                               ← Tous les ports
 ```
 
 ### Ressources

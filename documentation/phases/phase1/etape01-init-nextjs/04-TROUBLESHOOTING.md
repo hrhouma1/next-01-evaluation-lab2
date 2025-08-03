@@ -251,6 +251,228 @@ DEBUG=* npm run dev
 npm run lint -- --debug
 ```
 
+## Dépannage spécifique Windows PowerShell
+
+### Problème : Processus Node.js bloqué
+
+**Symptômes** :
+- Le serveur Next.js ne s'arrête pas avec `Ctrl+C`
+- Message "Port 3000 already in use"
+- Processus Node.js en arrière-plan
+
+**Solution PowerShell** :
+```powershell
+# Étape 1: Identifier les processus Node.js
+Get-Process node
+
+# Étape 2: Tuer tous les processus Node.js
+Get-Process node | Stop-Process -Force
+
+# Étape 3: Vérifier que le port 3000 est libre
+netstat -ano | findstr :3000
+```
+
+### Problème : Port 3000 occupé
+
+**Solution rapide PowerShell** :
+```powershell
+# Libérer automatiquement le port 3000
+$port = 3000
+Get-NetTCPConnection -LocalPort $port | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
+# Vérifier que le port est libre
+netstat -ano | findstr :3000
+# Aucun résultat = port libre ✅
+```
+
+### Problème : Cache Node.js corrompu (Windows)
+
+**Solution PowerShell** :
+```powershell
+# Nettoyer le cache npm
+npm cache clean --force
+
+# Supprimer node_modules avec PowerShell
+Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
+
+# Supprimer le cache Next.js
+Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
+
+# Réinstaller et redémarrer
+npm install
+npm run dev
+```
+
+### Commandes de diagnostic PowerShell
+
+```powershell
+# Vérifier les versions
+node --version
+npm --version
+
+# Voir tous les ports occupés
+netstat -ano
+
+# Voir les processus Node.js avec détails
+Get-Process node | Format-Table Id,ProcessName,CPU,WorkingSet
+
+# Tuer un processus spécifique
+Stop-Process -Id [PID] -Force
+
+# Redémarrer proprement
+Stop-Process -Name "node" -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+npm run dev
+```
+
+## Annexe 2 : Dépannage avec CMD (Command Prompt)
+
+### Alternative CMD aux commandes PowerShell
+
+Pour les utilisateurs qui préfèrent CMD :
+
+### Problème : Processus Node.js bloqué (CMD)
+
+**Solution CMD** :
+```cmd
+REM Étape 1: Voir tous les processus Node.js (plusieurs méthodes)
+tasklist | findstr node
+tasklist /fi "imagename eq node.exe"
+tasklist /fi "imagename eq node.exe" /fo table
+
+REM Étape 2: Tuer tous les processus Node.js (plusieurs variantes)
+taskkill /f /im node.exe
+taskkill /f /im node.exe /t
+taskkill /f /im "node*"
+
+REM Alternative puissante avec WMIC
+wmic process where "name='node.exe'" delete
+
+REM Boucle robuste pour tous les processus Node.js
+for /f "tokens=2 delims=," %i in ('tasklist /fi "imagename eq node.exe" /fo csv ^| findstr /v "PID"') do taskkill /f /pid %i
+
+REM Étape 3: Vérifier que les processus sont arrêtés
+tasklist | findstr node
+```
+
+### Problème : Port 3000 occupé (CMD)
+
+**Solution rapide CMD** :
+```cmd
+REM Libérer automatiquement le port 3000
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3000') do taskkill /f /pid %%a
+
+REM Ou étape par étape :
+netstat -ano | findstr :3000
+REM Noter le PID et l'utiliser :
+taskkill /f /pid [PID_TROUVÉ]
+
+REM Vérifier que le port est libre
+netstat -ano | findstr :3000
+REM Aucun résultat = port libre ✅
+```
+
+### Problème : Cache corrompu (CMD)
+
+**Solution CMD** :
+```cmd
+REM Nettoyer le cache npm
+npm cache clean --force
+
+REM Supprimer node_modules
+rmdir /s /q node_modules
+
+REM Supprimer le cache Next.js  
+rmdir /s /q .next
+
+REM Réinstaller et redémarrer
+npm install
+npm run dev
+```
+
+### Commandes de diagnostic CMD
+
+```cmd
+REM Vérifier les versions
+node --version
+npm --version
+
+REM Voir tous les processus Node.js avec détails (plusieurs formats)
+tasklist /fi "imagename eq node.exe" /fo table
+tasklist /fi "imagename eq node.exe" /fo csv
+tasklist | findstr node
+
+REM Voir les processus avec CPU et mémoire
+wmic process where "name='node.exe'" get ProcessId,PageFileUsage,WorkingSetSize
+
+REM Voir tous les ports occupés
+netstat -ano
+netstat -ano | findstr "LISTENING"
+
+REM Tuer un processus spécifique (plusieurs méthodes)
+taskkill /f /pid [PID]
+taskkill /f /im node.exe /t
+
+REM Nettoyage complet et redémarrage
+taskkill /f /im node.exe /t
+timeout /t 2
+rmdir /s /q .next 2>nul
+npm run dev
+
+REM Diagnostic complet en une commande
+echo === Processus Node.js === && tasklist | findstr node && echo === Port 3000 === && netstat -ano | findstr :3000
+```
+
+### Batch script de nettoyage (CMD)
+
+Créer un fichier `clean-project.bat` :
+```batch
+@echo off
+echo ===================================
+echo   NETTOYAGE PROJET NEXT.JS
+echo ===================================
+
+echo [1/6] Diagnostic initial...
+echo Processus Node.js detectes:
+tasklist | findstr node
+
+echo.
+echo [2/6] Arret des processus Node.js...
+taskkill /f /im node.exe /t 2>nul
+wmic process where "name='node.exe'" delete 2>nul
+
+echo.
+echo [3/6] Verification port 3000...
+netstat -ano | findstr :3000
+
+echo.
+echo [4/6] Suppression des caches...
+rmdir /s /q node_modules 2>nul
+rmdir /s /q .next 2>nul
+
+echo.
+echo [5/6] Nettoyage du cache npm...
+npm cache clean --force
+
+echo.
+echo [6/6] Reinstallation des dependances...
+npm install
+
+echo.
+echo ===================================
+echo   NETTOYAGE TERMINE!
+echo ===================================
+echo Verifications finales:
+tasklist | findstr node || echo Aucun processus Node.js actif
+netstat -ano | findstr :3000 || echo Port 3000 libre
+
+echo.
+echo Vous pouvez maintenant lancer: npm run dev
+pause
+```
+
+**Utilisation** : Double-cliquer sur `clean-project.bat` dans le dossier du projet.
+
 ## Ressources de support
 
 ### Documentation officielle

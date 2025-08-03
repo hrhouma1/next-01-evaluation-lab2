@@ -218,3 +218,120 @@ Le fichier package.json contient ces scripts par défaut :
   }
 }
 ```
+
+## Dépannage PowerShell (Windows)
+
+### Gestion des processus Node.js bloqués
+
+```powershell
+# Voir tous les processus Node.js en cours
+Get-Process node
+
+# Tuer tous les processus Node.js
+Get-Process node | Stop-Process -Force
+
+# Tuer un processus spécifique par son ID (PID)
+Stop-Process -Id [PID] -Force
+
+# Libérer le port 3000 spécifiquement
+netstat -ano | findstr :3000
+# Puis tuer le processus avec le PID trouvé
+Stop-Process -Id [PID] -Force
+```
+
+### Libération rapide du port 3000
+
+```powershell
+# Alternative plus simple pour libérer le port 3000
+$port = 3000
+Get-NetTCPConnection -LocalPort $port | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
+# Vérifier que le port est libre
+netstat -ano | findstr :3000
+```
+
+### Nettoyage PowerShell
+
+```powershell
+# Nettoyer le cache npm
+npm cache clean --force
+
+# Supprimer node_modules (Windows PowerShell)
+Remove-Item -Recurse -Force node_modules
+npm install
+
+# Supprimer le cache Next.js
+Remove-Item -Recurse -Force .next
+npm run dev
+```
+
+## Annexe 2 : Commandes CMD (Command Prompt)
+
+### Alternative CMD pour le dépannage
+
+```cmd
+REM Voir tous les processus Node.js (plusieurs méthodes)
+tasklist | findstr node
+tasklist /fi "imagename eq node.exe"
+tasklist /fi "imagename eq node.exe" /fo table
+
+REM Tuer tous les processus Node.js (plusieurs variantes)
+taskkill /f /im node.exe
+taskkill /f /im node.exe /t
+taskkill /f /im "node*"
+
+REM Alternative avec WMIC (plus puissant)
+wmic process where "name='node.exe'" delete
+
+REM Tuer un processus spécifique
+taskkill /f /pid [PID]
+
+REM Boucle robuste pour tuer tous les processus Node.js
+for /f "tokens=2 delims=," %i in ('tasklist /fi "imagename eq node.exe" /fo csv ^| findstr /v "PID"') do taskkill /f /pid %i
+
+REM Vérifier le port 3000 (plusieurs méthodes)
+netstat -ano | findstr :3000
+netstat -ano | findstr "LISTENING" | findstr :3000
+
+REM Libérer automatiquement le port 3000
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :3000') do taskkill /f /pid %a
+```
+
+### Nettoyage du projet (CMD)
+
+```cmd
+REM Nettoyer le cache npm
+npm cache clean --force
+
+REM Supprimer node_modules (CMD)
+rmdir /s /q node_modules
+npm install
+
+REM Supprimer le cache Next.js
+rmdir /s /q .next
+npm run dev
+
+REM Créer le fichier globals.css (CMD)
+if not exist "src\app\globals.css" (
+    echo @tailwind base; > src\app\globals.css
+    echo @tailwind components; >> src\app\globals.css
+    echo @tailwind utilities; >> src\app\globals.css
+)
+```
+
+### Diagnostic rapide (CMD)
+
+```cmd
+REM Versions
+node --version
+npm --version
+
+REM Processus en cours
+tasklist | findstr node
+
+REM Tous les ports occupés
+netstat -ano
+
+REM Redémarrage propre
+taskkill /f /im node.exe & timeout /t 2 & npm run dev
+```
