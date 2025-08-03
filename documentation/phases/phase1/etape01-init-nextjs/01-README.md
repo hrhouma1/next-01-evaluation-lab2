@@ -73,15 +73,11 @@ photo-marketplace/
 ```
 
 
-#### 4. Résolution des erreurs
+### Dépannage courant
 
-```bash
-# Lancer le serveur de développement
-npm run dev
-```
+#### Erreur "Can't resolve 'tailwindcss'"
 
-
-L’erreur suivante indique que **Tailwind CSS n’est pas installé** dans ton projet :
+L'erreur suivante indique que **Tailwind CSS n'est pas installé** dans votre projet :
 
 ```
 Module not found: Can't resolve 'tailwindcss'
@@ -99,9 +95,9 @@ Mais `tailwindcss` n’est **pas présent dans `node_modules`**.
 
 
 
-###  Solution : installer Tailwind CSS correctement
+**Solution** : installer Tailwind CSS correctement
 
-Exécute **ces 4 commandes** à la racine de ton projet :
+Exécutez **ces commandes** à la racine de votre projet :
 
 ```bash
 npm uninstall tailwindcss
@@ -115,7 +111,7 @@ Cela va :
 * créer les fichiers `tailwind.config.js` et `postcss.config.js`
 
 
-###  Étapes supplémentaires à vérifier
+**Étapes supplémentaires à vérifier** :
 
 1. **tailwind.config.js** doit inclure les bons chemins (pour Next.js 13+ avec App Router) :
 
@@ -141,7 +137,7 @@ module.exports = {
 @tailwind utilities;
 ```
 
-3. Ton fichier **`src/app/layout.tsx` ou `layout.js`** doit importer le fichier CSS global :
+3. Votre fichier **`src/app/layout.tsx` ou `layout.js`** doit importer le fichier CSS global :
 
 ```tsx
 import './globals.css'
@@ -149,9 +145,9 @@ import './globals.css'
 
 
 
-###  Redémarrer le serveur
+**Redémarrer le serveur** :
 
-Après installation, redémarre ton serveur Next.js :
+Après installation, redémarrez votre serveur Next.js :
 
 ```bash
 npm run dev
@@ -159,9 +155,9 @@ npm run dev
 
 
 
-###  Test rapide
+**Test rapide** :
 
-Tu peux tester Tailwind avec ce composant :
+Vous pouvez tester Tailwind avec ce composant :
 
 ```tsx
 export default function Home() {
@@ -195,7 +191,7 @@ export default function Home() {
 
 Une fois cette étape terminée, vous pourrez passer à l'étape 2 : Configuration de Prisma avec Neon PostgreSQL.
 
-### Dépannage courant
+### Autres problèmes courants
 
 #### Erreur de permission Node.js
 ```bash
