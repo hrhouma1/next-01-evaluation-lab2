@@ -16,6 +16,15 @@
 - [ ] Naviguer dans le dossier du projet `cd photo-marketplace`
 - [ ] **IMPORTANT**: Forcer l'installation de Tailwind CSS 3 (pas v4)
 - [ ] Vérifier que la version de Tailwind CSS est bien 3.x.x avec `npm list tailwindcss`
+- [ ] Créer `src/app/globals.css` s'il n'existe pas
+- [ ] Ajouter les directives Tailwind dans `globals.css`
+
+### Vérification de la structure
+
+- [ ] Vérifier que `src/app/globals.css` existe et contient les directives Tailwind
+- [ ] Vérifier que `src/app/layout.tsx` importe `globals.css`
+- [ ] Vérifier que `tailwind.config.js` est à la racine du projet
+- [ ] Vérifier la structure complète avec `tree src/` ou `ls -la src/app/`
 
 ### Vérification de l'installation
 
@@ -30,6 +39,13 @@
 - [ ] **Tailwind CSS** : Classes CSS Tailwind fonctionnelles
 - [ ] **ESLint** : Aucune erreur de linting
 - [ ] **Hot reload** : Modifications détectées automatiquement
+
+### Test Tailwind CSS
+
+- [ ] Modifier `src/app/page.tsx` avec le composant de test
+- [ ] Vérifier que la page affiche un fond gris avec un texte bleu centré
+- [ ] Vérifier que la boîte blanche avec ombre s'affiche correctement
+- [ ] Confirmer que Tailwind CSS 3 fonctionne
 
 ### Initialisation Git
 

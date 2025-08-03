@@ -54,23 +54,37 @@ L'application devrait être accessible sur http://localhost:3000
 - `--src-dir` : Place le code source dans un dossier src/
 - `--import-alias="@/*"` : Configure les imports absolus avec @/
 
-### Structure attendue après création
+### Structure complète du projet Next.js 14
 
 ```
 photo-marketplace/
-├── src/
-│   ├── app/
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   └── (autres dossiers src/)
-├── public/
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-├── next.config.js
-└── README.md
+├── src/                          ← Dossier source principal
+│   ├── app/                      ← App Router (Next.js 14)
+│   │   ├── globals.css           ← CSS global avec Tailwind
+│   │   ├── layout.tsx            ← Layout principal (importe globals.css)
+│   │   ├── page.tsx              ← Page d'accueil
+│   │   └── favicon.ico           ← Favicon
+│   ├── components/               ← Composants réutilisables (à créer)
+│   └── lib/                      ← Utilitaires (à créer plus tard)
+├── public/                       ← Fichiers statiques
+│   ├── next.svg
+│   └── vercel.svg
+├── node_modules/                 ← Dépendances npm
+├── package.json                  ← Configuration npm
+├── package-lock.json             ← Verrouillage des versions
+├── tsconfig.json                 ← Configuration TypeScript
+├── tailwind.config.js            ← Configuration Tailwind CSS
+├── postcss.config.js             ← Configuration PostCSS
+├── next.config.js                ← Configuration Next.js
+├── eslint.config.js              ← Configuration ESLint
+└── README.md                     ← Documentation
 ```
+
+**Fichiers clés à retenir** :
+- `src/app/layout.tsx` : Layout principal qui importe `globals.css`
+- `src/app/globals.css` : CSS global avec directives Tailwind
+- `src/app/page.tsx` : Page d'accueil
+- `tailwind.config.js` : Configuration Tailwind (racine)
 
 
 ### Dépannage courant
@@ -108,12 +122,28 @@ npx tailwindcss init -p
 Cela va :
 
 * installer les dépendances manquantes
-* créer les fichiers `tailwind.config.js` et `postcss.config.js`
+* créer les fichiers `tailwind.config.js` et `postcss.config.js` à la racine
+
+**Important** : Si `create-next-app` n'a pas créé `globals.css`, créez-le manuellement :
+
+```bash
+# Créer le fichier globals.css s'il n'existe pas
+touch src/app/globals.css
+```
+
+Ou créez-le via votre éditeur de code dans `src/app/globals.css`
 
 
 **Étapes supplémentaires à vérifier** :
 
-1. **tailwind.config.js** doit inclure les bons chemins (pour Next.js 13+ avec App Router) :
+1. **tailwind.config.js** (à la racine du projet) doit inclure les bons chemins :
+
+```
+photo-marketplace/
+├── tailwind.config.js  ← ICI
+├── src/
+└── package.json
+```
 
 ```js
 // tailwind.config.js
@@ -129,18 +159,60 @@ module.exports = {
 }
 ```
 
-2. **globals.css** doit inclure les directives suivantes :
+2. **src/app/globals.css** doit inclure les directives Tailwind :
+
+```
+photo-marketplace/
+├── src/
+│   ├── app/
+│   │   ├── globals.css  ← ICI
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   └── components/
+└── package.json
+```
 
 ```css
+/* src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Vous pouvez ajouter vos styles personnalisés ici */
 ```
 
-3. Votre fichier **`src/app/layout.tsx` ou `layout.js`** doit importer le fichier CSS global :
+**Note** : Si le fichier `globals.css` n'existe pas, créez-le manuellement dans `src/app/`
+
+3. **src/app/layout.tsx** doit importer le fichier CSS global :
+
+```
+photo-marketplace/
+├── src/
+│   ├── app/
+│   │   ├── globals.css
+│   │   ├── layout.tsx  ← ICI
+│   │   └── page.tsx
+│   └── components/
+└── package.json
+```
 
 ```tsx
-import './globals.css'
+// src/app/layout.tsx
+import './globals.css'  // ← Import du CSS global
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="fr">
+      <body>
+        {children}
+      </body>
+    </html>
+  )
+}
 ```
 
 
@@ -157,17 +229,37 @@ npm run dev
 
 **Test rapide** :
 
-Vous pouvez tester Tailwind avec ce composant :
+Modifiez le fichier **src/app/page.tsx** pour tester Tailwind :
+
+```
+photo-marketplace/
+├── src/
+│   ├── app/
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx  ← MODIFIER ICI
+│   └── components/
+└── package.json
+```
 
 ```tsx
+// src/app/page.tsx
 export default function Home() {
   return (
-    <div className="text-3xl font-bold text-blue-600">
-      Hello Tailwind!
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-3xl font-bold text-blue-600 bg-white p-8 rounded-lg shadow-lg">
+        Hello Tailwind CSS 3!
+      </div>
     </div>
   );
 }
 ```
+
+**Résultat attendu** : 
+- Page avec fond gris clair
+- Texte bleu, gros et en gras, centré
+- Boîte blanche avec ombre portée
+- Si vous voyez ce style → Tailwind CSS fonctionne ! ✅
 
 
 

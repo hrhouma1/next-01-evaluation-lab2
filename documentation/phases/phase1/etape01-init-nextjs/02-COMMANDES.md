@@ -30,16 +30,43 @@ npm install tailwindcss@^3.4.0 postcss autoprefixer
 
 # Regénérer la configuration Tailwind pour la v3
 npx tailwindcss init -p
+
+# Créer globals.css si il n'existe pas (Windows)
+if not exist "src\app\globals.css" echo @tailwind base; @tailwind components; @tailwind utilities; > src\app\globals.css
+
+# Créer globals.css si il n'existe pas (macOS/Linux)
+[ ! -f src/app/globals.css ] && echo -e "@tailwind base;\n@tailwind components;\n@tailwind utilities;" > src/app/globals.css
 ```
 
-### 3. Lancement du serveur
+### 3. Vérification de la structure
+
+```bash
+# Vérifier que tous les fichiers sont en place
+tree src/ -I node_modules
+
+# Ou avec ls (si tree n'est pas disponible)
+ls -la src/app/
+```
+
+**Structure attendue** :
+```
+src/
+├── app/
+│   ├── globals.css     ← Doit contenir les directives Tailwind
+│   ├── layout.tsx      ← Doit importer globals.css
+│   ├── page.tsx        ← Page d'accueil
+│   └── favicon.ico
+└── components/         ← Dossier à créer plus tard
+```
+
+### 4. Lancement du serveur
 
 ```bash
 # Lancer le serveur de développement
 npm run dev
 ```
 
-### 4. Commandes de vérification
+### 5. Commandes de vérification
 
 ```bash
 # Vérifier la version de Node.js
@@ -59,9 +86,15 @@ npm run lint
 
 # Vérifier la version de Tailwind CSS (doit être 3.x.x)
 npm list tailwindcss
+
+# Vérifier le contenu de globals.css
+cat src/app/globals.css
+
+# Vérifier que layout.tsx importe globals.css
+grep "globals.css" src/app/layout.tsx
 ```
 
-### 5. Gestion Git
+### 6. Gestion Git
 
 ```bash
 # Initialiser Git (si pas déjà fait)
