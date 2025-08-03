@@ -72,6 +72,111 @@ photo-marketplace/
 └── README.md
 ```
 
+
+#### 4. Résolution des erreurs
+
+```bash
+# Lancer le serveur de développement
+npm run dev
+```
+
+
+L’erreur suivante indique que **Tailwind CSS n’est pas installé** dans ton projet :
+
+```
+Module not found: Can't resolve 'tailwindcss'
+```
+
+Cela vient du fichier `globals.css` (ou équivalent) qui tente d'importer Tailwind via :
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Mais `tailwindcss` n’est **pas présent dans `node_modules`**.
+
+
+
+###  Solution : installer Tailwind CSS correctement
+
+Exécute **ces 4 commandes** à la racine de ton projet :
+
+```bash
+npm uninstall tailwindcss
+npm install tailwindcss@^3.4.0 postcss autoprefixer
+npx tailwindcss init -p
+```
+
+Cela va :
+
+* installer les dépendances manquantes
+* créer les fichiers `tailwind.config.js` et `postcss.config.js`
+
+
+###  Étapes supplémentaires à vérifier
+
+1. **tailwind.config.js** doit inclure les bons chemins (pour Next.js 13+ avec App Router) :
+
+```js
+// tailwind.config.js
+module.exports = {
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+2. **globals.css** doit inclure les directives suivantes :
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+3. Ton fichier **`src/app/layout.tsx` ou `layout.js`** doit importer le fichier CSS global :
+
+```tsx
+import './globals.css'
+```
+
+
+
+###  Redémarrer le serveur
+
+Après installation, redémarre ton serveur Next.js :
+
+```bash
+npm run dev
+```
+
+
+
+###  Test rapide
+
+Tu peux tester Tailwind avec ce composant :
+
+```tsx
+export default function Home() {
+  return (
+    <div className="text-3xl font-bold text-blue-600">
+      Hello Tailwind!
+    </div>
+  );
+}
+```
+
+
+
+
+
 ### Vérifications à effectuer
 
 1. **Page d'accueil accessible** : http://localhost:3000 doit afficher la page Next.js par défaut
