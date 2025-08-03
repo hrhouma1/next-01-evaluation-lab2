@@ -1,4 +1,4 @@
-# Étape 1 : Initialisation du projet Next.js avec TypeScript
+q# Étape 1 : Initialisation du projet Next.js avec TypeScript
 
 ## Phase 1 - Configuration initiale du projet
 
