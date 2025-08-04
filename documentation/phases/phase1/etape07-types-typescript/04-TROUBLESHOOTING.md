@@ -1,6 +1,127 @@
 # Étape 7 : Dépannage Types TypeScript avancés
 
-## Problèmes de compilation TypeScript
+## 🚨 URGENT : Résoudre les 119 erreurs de l'étape 6 d'abord
+
+### Problème critique : Compilation échoue avec 119 erreurs
+
+**Symptôme** :
+```bash
+npx tsc --noEmit
+# Found 119 errors in 12 files.
+```
+
+**Diagnostic rapide** :
+- Erreurs `Cannot find name 'UserRole'` → Types non importés
+- Erreurs `Module has no exported member 'handlers'` → NextAuth v5 incompatible
+- Erreurs `Property comes from index signature` → tsconfig.json strict
+
+### Solutions par famille d'erreurs
+
+#### Famille 1 : NextAuth handlers (6 erreurs)
+```bash
+# Corriger src/app/api/auth/[...nextauth]/route.ts
+echo 'import NextAuth from "next-auth"
+import authConfig from "@/lib/auth-config"
+
+const handler = NextAuth(authConfig)
+export { handler as GET, handler as POST }' > src/app/api/auth/[...nextauth]/route.ts
+```
+
+#### Famille 2 : Variables d'environnement (8 erreurs)
+```bash
+# Option A: Corriger tsconfig.json
+# Dans tsconfig.json, ajouter : "noPropertyAccessFromIndexSignature": false
+
+# Option B: Corriger manuellement dans src/lib/auth-config.ts
+# Remplacer : process.env.GOOGLE_CLIENT_ID
+# Par : process.env["GOOGLE_CLIENT_ID"]
+```
+
+#### Famille 3 : Pages NextAuth v5 (2 erreurs)
+```typescript
+// Dans src/lib/auth-config.ts, SUPPRIMER cette ligne :
+// signUp: "/auth/signup",  // ← N'existe pas en NextAuth v5
+```
+
+#### Famille 4 : Callbacks NextAuth v5 (3 erreurs)
+```typescript
+// Dans src/lib/auth-config.ts, REMPLACER :
+// async signOut({ session, token }) { ... }
+// PAR :
+async signOut() {
+  console.log("Utilisateur déconnecté")
+}
+```
+
+#### Famille 5 : Types React (2 erreurs)
+```tsx
+// Dans les composants, REMPLACER :
+// alt={session.user.name}
+// PAR :
+alt={session.user.name ?? "Photo de profil"}
+```
+
+#### Famille 6 : Types auth non trouvés (98 erreurs)
+```bash
+# Corriger les exports ambigus
+cat > src/types/auth/index.ts << 'EOF'
+export type {
+  UserRole,
+  UserStatus,
+  UserPreferences,
+  ExtendedUser,
+  PhotoMarketSession,
+  ExtendedJWT,
+  Permission,
+  OAuthProvider
+} from "./session"
+
+export type {
+  UserId,
+  Email,
+  HashedPassword,
+  CreateUserInput,
+  UpdateUserInput
+} from "./user"
+
+export type {
+  ExtendedOAuthConfig,
+  OAuthAccount,
+  ProvidersConfig
+} from "./providers"
+
+export type {
+  SessionCallback,
+  JWTCallback,
+  NextAuthCallbacks
+} from "./callbacks"
+
+export type {
+  MiddlewareConfig,
+  ProtectedRoute,
+  MiddlewareSession
+} from "./middleware"
+
+export type {
+  SignInFormData,
+  SignUpFormData,
+  ProfileFormData
+} from "./forms"
+EOF
+```
+
+### Vérification finale obligatoire
+
+```bash
+# DOIT afficher : "Found 0 errors."
+npx tsc --noEmit
+```
+
+**Si encore des erreurs** : Relire attentivement chaque correction ci-dessus.
+
+---
+
+## Problèmes de compilation TypeScript (après correction étape 6)
 
 ### 1. Erreur "Type instantiation is excessively deep and possibly infinite"
 

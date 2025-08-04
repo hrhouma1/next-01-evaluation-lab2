@@ -1,8 +1,41 @@
 # Étape 7 : Checklist Types TypeScript avancés
 
+## URGENT : Corriger les erreurs de l'étape 6 d'abord
+
+### Vérification critique des erreurs TypeScript
+
+**🚨 Si vous avez des erreurs après l'étape 6, ARRÊTEZ et corrigez d'abord :**
+
+- [ ] **Test compilation** : `npx tsc --noEmit` 
+  - ✅ Doit afficher : `Found 0 errors.`
+  - ❌ Si 119 erreurs → Suivre le guide de correction dans le README
+
+#### Correction des erreurs principales
+
+- [ ] **Erreur handlers NextAuth** : Corriger `src/app/api/auth/[...nextauth]/route.ts`
+- [ ] **Erreur variables d'env** : Utiliser `process.env["VARIABLE"]` au lieu de `process.env.VARIABLE`
+- [ ] **Erreur pages NextAuth** : Supprimer `signUp: "/auth/signup"` (n'existe pas en v5)
+- [ ] **Erreur callbacks** : Corriger `signOut()` sans paramètres  
+- [ ] **Erreur types React** : Utiliser `session.user.name ?? "default"` 
+- [ ] **Erreur tsconfig** : Ajouter `"noPropertyAccessFromIndexSignature": false`
+- [ ] **Erreur exports ambigus** : Corriger `src/types/auth/index.ts`
+- [ ] **Erreur imports manquants** : Ajouter imports dans `type-guards.ts` et `permissions-utils.ts`
+
+#### Test final de correction
+
+```bash
+# Cette commande DOIT afficher 0 erreurs :
+npx tsc --noEmit
+```
+
+- [ ] ✅ **0 erreurs confirmé** (passer à l'étape 7)
+- [ ] ❌ **Encore des erreurs** (relire le guide de correction dans README)
+
+---
+
 ## IMPORTANT : Guide pour ultra-débutants
 
-### AVANT DE COMMENCER - Vérifications obligatoires
+### APRÈS CORRECTION - Vérifications obligatoires
 
 **⚠️ ÉTAPE 6 TERMINÉE ?**
 - [ ] Tester : `npx tsc --noEmit` (AUCUNE erreur)

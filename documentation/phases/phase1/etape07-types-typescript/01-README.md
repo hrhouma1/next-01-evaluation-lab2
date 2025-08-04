@@ -13,6 +13,313 @@ npx tsc --noEmit
 # Si erreurs, retourner à l'étape 6 d'abord
 ```
 
+### CORRECTION URGENTE : Erreurs de compilation TypeScript
+
+**Si vous avez des erreurs après l'étape 6, voici les corrections immédiates :**
+
+**Erreur 1 : Import handlers dans route.ts**
+```typescript
+// ❌ INCORRECT dans src/app/api/auth/[...nextauth]/route.ts
+import { handlers } from "@/lib/auth"
+
+// ✅ CORRECT - Remplacer par :
+import NextAuth from "next-auth"
+import authConfig from "@/lib/auth-config"
+
+const handler = NextAuth(authConfig)
+export { handler as GET, handler as POST }
+```
+
+**Erreur 2 : Variables d'environnement strict**
+```typescript
+// ❌ INCORRECT dans src/lib/auth-config.ts
+clientId: process.env.GOOGLE_CLIENT_ID!,
+
+// ✅ CORRECT - Remplacer par :
+clientId: process.env["GOOGLE_CLIENT_ID"]!,
+clientSecret: process.env["GOOGLE_CLIENT_SECRET"]!,
+```
+
+**Erreur 3 : Pages NextAuth v5**
+```typescript
+// ❌ INCORRECT dans src/lib/auth-config.ts
+pages: {
+  signIn: "/auth/signin",
+  signUp: "/auth/signup",  // ← N'existe pas
+  error: "/auth/error",
+}
+
+// ✅ CORRECT - Remplacer par :
+pages: {
+  signIn: "/auth/signin",
+  error: "/auth/error",
+}
+```
+
+**Erreur 4 : Callbacks NextAuth v5**
+```typescript
+// ❌ INCORRECT dans src/lib/auth-config.ts
+async signOut({ session, token }) {
+  // Ces paramètres n'existent plus
+}
+
+// ✅ CORRECT - Remplacer par :
+async signOut() {
+  console.log("Utilisateur déconnecté")
+}
+```
+
+**Erreur 5 : Types React strict**
+```tsx
+// ❌ INCORRECT dans composants
+alt={session.user.name}
+
+// ✅ CORRECT - Remplacer par :
+alt={session.user.name ?? "Photo de profil"}
+```
+
+### GUIDE COMPLET : Résoudre TOUTES les erreurs TypeScript (119 erreurs)
+
+**Avant de commencer l'étape 7, résolvez TOUTES ces erreurs dans l'ordre :**
+
+#### Famille 1 : Erreurs d'imports NextAuth (6 erreurs)
+
+**Fichier** : `src/app/api/auth/[...nextauth]/route.ts`
+```typescript
+// REMPLACER TOUT LE CONTENU par :
+import NextAuth from "next-auth"
+import authConfig from "@/lib/auth-config"
+
+const handler = NextAuth(authConfig)
+export { handler as GET, handler as POST }
+```
+
+#### Famille 2 : Variables d'environnement TypeScript strict (8 erreurs)
+
+**Fichier** : `src/lib/auth-config.ts`
+```typescript
+// REMPLACER ces lignes :
+// ❌ clientId: process.env.GOOGLE_CLIENT_ID!,
+// ❌ clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+
+// ✅ PAR :
+clientId: process.env["GOOGLE_CLIENT_ID"]!,
+clientSecret: process.env["GOOGLE_CLIENT_SECRET"]!,
+clientId: process.env["GITHUB_CLIENT_ID"]!,
+clientSecret: process.env["GITHUB_CLIENT_SECRET"]!,
+
+// OU OPTION B dans tsconfig.json :
+"noPropertyAccessFromIndexSignature": false
+```
+
+#### Famille 3 : Propriétés NextAuth v5 inexistantes (2 erreurs)
+
+**Fichier** : `src/lib/auth-config.ts`
+```typescript
+// SUPPRIMER cette ligne :
+// ❌ signUp: "/auth/signup",
+
+// GARDER seulement :
+pages: {
+  signIn: "/auth/signin",
+  error: "/auth/error",
+}
+```
+
+#### Famille 4 : Callbacks NextAuth v5 incompatibles (3 erreurs)
+
+**Fichier** : `src/lib/auth-config.ts`
+```typescript
+// REMPLACER :
+// ❌ async signOut({ session, token }) {
+// ❌   console.log("Déconnexion", session?.user?.email)
+// ❌ }
+
+// ✅ PAR :
+async signOut() {
+  console.log("Utilisateur déconnecté")
+}
+
+// ET CORRIGER jwt callback :
+async jwt({ token, user }) {
+  if (user) {
+    token.id = user.id as string  // ← Assertion de type
+  }
+  return token
+}
+```
+
+#### Famille 5 : Types React strict null/undefined (2 erreurs)
+
+**Fichier** : `src/components/auth/user-profile.tsx`
+```tsx
+// REMPLACER :
+// ❌ alt={session.user.name}
+
+// ✅ PAR :
+alt={session.user.name ?? "Photo de profil"}
+```
+
+#### Famille 6 : Types auth non importés (98 erreurs majeures)
+
+**ÉTAPE CRITIQUE** : Corriger les imports manquants
+
+**6.1 - Corriger tsconfig.json** :
+```json
+{
+  "compilerOptions": {
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "next-env.d.ts"]
+}
+```
+
+**6.2 - Corriger src/types/auth/index.ts** (exports ambigus) :
+```typescript
+// REMPLACER TOUT LE CONTENU PAR :
+// Exports principaux auth
+export type {
+  UserRole,
+  UserStatus,
+  UserPreferences,
+  ExtendedUser,
+  PhotoMarketSession,
+  ExtendedJWT,
+  Permission,
+  OAuthProvider
+} from "./session"
+
+// Exports user avec alias pour éviter conflits
+export type {
+  UserId,
+  Email,
+  HashedPassword,
+  CreateUserInput,
+  UpdateUserInput
+} from "./user"
+
+// Exports providers
+export type {
+  ExtendedOAuthConfig,
+  OAuthAccount,
+  ProvidersConfig
+} from "./providers"
+
+// Exports callbacks
+export type {
+  SessionCallback,
+  JWTCallback,
+  NextAuthCallbacks
+} from "./callbacks"
+
+// Exports middleware
+export type {
+  MiddlewareConfig,
+  ProtectedRoute,
+  MiddlewareSession
+} from "./middleware"
+
+// Exports forms
+export type {
+  SignInFormData,
+  SignUpFormData,
+  ProfileFormData
+} from "./forms"
+```
+
+**6.3 - Ajouter imports dans type-guards.ts** :
+```typescript
+// AJOUTER EN HAUT de src/lib/auth/type-guards.ts :
+import type { 
+  UserRole, 
+  UserStatus, 
+  OAuthProvider, 
+  ExtendedUser, 
+  PhotoMarketSession, 
+  ExtendedJWT, 
+  Permission,
+  Email
+} from "@/types/auth"
+import { signInSchema, signUpSchema } from "@/lib/auth/validators"
+
+// ET AJOUTER cette fonction manquante :
+export function calculateUserPermissions(
+  role: UserRole,
+  status: UserStatus,
+  userStats?: ExtendedUser["stats"]
+): ExtendedUser["permissions"] {
+  const basePermissions: ExtendedUser["permissions"] = {
+    "photos:view": true,
+    "photos:upload": false,
+    "photos:edit": false,
+    "photos:delete": false,
+    "purchases:view": false,
+    "purchases:manage": false,
+    "users:view": false,
+    "users:manage": false,
+    "admin:access": false
+  }
+
+  if (role === "ADMIN") {
+    return {
+      "photos:view": true,
+      "photos:upload": true,
+      "photos:edit": true,
+      "photos:delete": true,
+      "purchases:view": true,
+      "purchases:manage": true,
+      "users:view": true,
+      "users:manage": true,
+      "admin:access": true
+    }
+  }
+
+  if (status === "ACTIVE") {
+    basePermissions["photos:upload"] = true
+    basePermissions["purchases:view"] = true
+  }
+
+  return basePermissions
+}
+```
+
+**6.4 - Ajouter imports dans permissions-utils.ts** :
+```typescript
+// AJOUTER EN HAUT de src/lib/auth/permissions-utils.ts :
+import type { 
+  UserRole, 
+  UserStatus, 
+  ExtendedUser, 
+  PhotoMarketSession, 
+  Permission 
+} from "@/types/auth"
+import { 
+  hasPermission, 
+  hasRole, 
+  isActiveUser, 
+  calculateUserPermissions 
+} from "./type-guards"
+import { useSession } from "next-auth/react"
+import { useMemo } from "react"
+```
+
+### COMMANDE DE VÉRIFICATION FINALE
+
+Après TOUTES ces corrections :
+```bash
+npx tsc --noEmit
+```
+
+**DOIT afficher : Found 0 errors.**
+
+Si encore des erreurs, répétez ces étapes dans l'ordre jusqu'à 0 erreur.
+
+---
+
 **Étape 2 : Tester que NextAuth.js fonctionne** :
 ```bash
 # Démarrer le serveur

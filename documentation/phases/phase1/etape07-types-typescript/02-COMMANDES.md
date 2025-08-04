@@ -1,5 +1,112 @@
 # Étape 7 : Commandes Types TypeScript avancés
 
+## URGENT : Corriger les erreurs de l'étape 6 d'abord
+
+**Si vous avez des erreurs TypeScript après l'étape 6, exécutez ces commandes :**
+
+### Correction automatique des erreurs TypeScript
+
+```bash
+# 1. Corriger le routeur NextAuth
+echo 'import NextAuth from "next-auth"
+import authConfig from "@/lib/auth-config"
+
+const handler = NextAuth(authConfig)
+export { handler as GET, handler as POST }' > src/app/api/auth/[...nextauth]/route.ts
+
+# 2. Corriger tsconfig.json pour les imports
+cat > tsconfig.json << 'EOF'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+EOF
+
+# 3. Corriger les exports types auth
+cat > src/types/auth/index.ts << 'EOF'
+// Exports principaux auth
+export type {
+  UserRole,
+  UserStatus,
+  UserPreferences,
+  ExtendedUser,
+  PhotoMarketSession,
+  ExtendedJWT,
+  Permission,
+  OAuthProvider
+} from "./session"
+
+// Exports user 
+export type {
+  UserId,
+  Email,
+  HashedPassword,
+  CreateUserInput,
+  UpdateUserInput
+} from "./user"
+
+// Exports providers
+export type {
+  ExtendedOAuthConfig,
+  OAuthAccount,
+  ProvidersConfig
+} from "./providers"
+
+// Exports callbacks
+export type {
+  SessionCallback,
+  JWTCallback,
+  NextAuthCallbacks
+} from "./callbacks"
+
+// Exports middleware
+export type {
+  MiddlewareConfig,
+  ProtectedRoute,
+  MiddlewareSession
+} from "./middleware"
+
+// Exports forms
+export type {
+  SignInFormData,
+  SignUpFormData,
+  ProfileFormData
+} from "./forms"
+EOF
+
+# 4. Test de compilation - DOIT afficher 0 erreurs
+npx tsc --noEmit
+```
+
+**Si encore des erreurs, suivez les instructions détaillées dans le README.**
+
+---
+
 ## IMPORTANT : Instructions pour ultra-débutants
 
 ### AVANT TOUTE COMMANDE - Vérifications obligatoires
