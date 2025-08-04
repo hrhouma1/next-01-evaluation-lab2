@@ -681,7 +681,12 @@ export default function AuthErrorPage() {
 
 ### IMPORTANT : Composants de base temporaires pour éviter les erreurs
 
-Les pages ci-dessus importent des composants (`SignInForm`, `SignUpForm`) qui ne sont pas encore créés. Pour éviter les erreurs de build, crée d'abord ces composants temporaires :
+**ATTENTION ULTRA-DÉBUTANTS** : 
+- ❌ **AUCUN fichier n'est généré automatiquement par NextAuth.js**
+- ✅ **TOUT doit être créé manuellement par vous**
+- ✅ **Chaque fichier doit être créé avec le code fourni ci-dessous**
+
+Les pages ci-dessus importent des composants (`SignInForm`, `SignUpForm`) qui **N'EXISTENT PAS ENCORE**. Pour éviter les erreurs de build, vous devez **CRÉER MANUELLEMENT** ces composants temporaires :
 
 **Créer `src/components/auth/signin-form.tsx`** :
 ```tsx
@@ -761,12 +766,50 @@ export function SignUpForm() {
 }
 ```
 
-**Créer le dossier des composants** :
+### ÉTAPES MANUELLES OBLIGATOIRES - À FAIRE UNE PAR UNE
+
+**Étape 1 : Créer le dossier des composants** :
 ```bash
-# Créer la structure des composants
+# Dans le terminal, dans le dossier de votre projet :
 mkdir -p src/components/auth
 
-# Les fichiers signin-form.tsx et signup-form.tsx doivent être créés avec le contenu ci-dessus
+# Vérifier que le dossier est créé :
+ls -la src/components/
+# Vous devez voir le dossier "auth"
+```
+
+**Étape 2 : Créer MANUELLEMENT le fichier signin-form.tsx** :
+```bash
+# Créer le fichier vide
+touch src/components/auth/signin-form.tsx
+
+# OU avec votre éditeur :
+# - Aller dans src/components/auth/
+# - Créer un nouveau fichier
+# - Le nommer "signin-form.tsx"
+# - Copier-coller le code fourni ci-dessus
+```
+
+**Étape 3 : Créer MANUELLEMENT le fichier signup-form.tsx** :
+```bash
+# Créer le fichier vide
+touch src/components/auth/signup-form.tsx
+
+# OU avec votre éditeur :
+# - Aller dans src/components/auth/
+# - Créer un nouveau fichier  
+# - Le nommer "signup-form.tsx"
+# - Copier-coller le code fourni ci-dessus
+```
+
+**Étape 4 : Vérifier que les fichiers existent** :
+```bash
+# Vérifier la structure complète :
+find src/components -name "*.tsx"
+
+# Doit afficher :
+# src/components/auth/signin-form.tsx
+# src/components/auth/signup-form.tsx
 ```
 
 **Vérification des composants** :
@@ -775,6 +818,108 @@ Une fois les composants créés, vérifie que :
 - [ ] Le fichier `signin-form.tsx` existe et contient le composant `SignInForm`
 - [ ] Le fichier `signup-form.tsx` existe et contient le composant `SignUpForm`
 - [ ] Aucune erreur de build `Module not found` dans la console
+
+### URLS À TESTER - ÉTAPE PAR ÉTAPE
+
+**Étape 1 : Démarrer le serveur de développement** :
+```bash
+# Dans le terminal, dans votre projet :
+npm run dev
+
+# Attendre que le serveur démarre - vous devez voir :
+# ✓ Ready in XXXms
+# ○ Local:        http://localhost:3000
+```
+
+**Étape 2 : Tester les URLs NextAuth.js par défaut** :
+```bash
+# Dans votre navigateur, aller sur :
+http://localhost:3000/api/auth/signin
+
+# Vous devez voir :
+# - La page de connexion par défaut de NextAuth.js
+# - Avec les boutons "Sign in with Google" etc. (si configuré)
+# - OU un formulaire de connexion basique
+```
+
+**Étape 3 : Tester vos pages personnalisées** :
+```bash
+# Dans votre navigateur, aller sur :
+http://localhost:3000/auth/signin
+
+# Vous devez voir :
+# - Votre page personnalisée avec le titre "Connexion à PhotoMarket"
+# - Un encadré bleu avec "Composant temporaire"
+# - Un bouton "Se connecter (NextAuth par défaut)"
+
+# Puis tester :
+http://localhost:3000/auth/signup
+
+# Vous devez voir :
+# - Votre page personnalisée avec le titre "Créer un compte PhotoMarket" 
+# - Un encadré bleu avec "Composant temporaire"
+# - Un bouton "Se connecter ou s'inscrire (NextAuth par défaut)"
+```
+
+**Étape 4 : Tester que les boutons fonctionnent** :
+```bash
+# Sur http://localhost:3000/auth/signin
+# - Cliquer sur "Se connecter (NextAuth par défaut)"
+# - Vous devez être redirigé vers http://localhost:3000/api/auth/signin
+# - Vous voyez la page de connexion NextAuth.js
+
+# Sur http://localhost:3000/auth/signup  
+# - Cliquer sur "Se connecter ou s'inscrire (NextAuth par défaut)"
+# - Vous devez être redirigé vers http://localhost:3000/api/auth/signin
+# - Vous voyez la page de connexion NextAuth.js
+```
+
+**Étape 5 : Vérifier qu'il n'y a pas d'erreurs** :
+```bash
+# Dans le terminal où tourne npm run dev, vérifier :
+# - Aucune erreur rouge
+# - Aucun "Module not found"
+# - Aucun "Cannot resolve"
+
+# Si vous voyez des erreurs, relire les sections précédentes
+```
+
+### IMPORTANT : Structure complète des composants (étapes futures)
+
+**QUESTION FRÉQUENTE** : "Et les autres fichiers comme oauth-buttons.tsx, logout-button.tsx, etc. ?"
+
+**RÉPONSE** : Ces fichiers **NE SONT PAS CRÉÉS MAINTENANT** ! Voici la planification :
+
+**Structure ACTUELLE (Étape 5)** :
+```
+src/components/auth/
+├── signin-form.tsx           ← ✅ CRÉÉ (composant temporaire)
+└── signup-form.tsx           ← ✅ CRÉÉ (composant temporaire)
+```
+
+**Structure COMPLÈTE (Étapes futures)** :
+```
+src/components/auth/
+├── signin-form.tsx           ← ✅ Étape 5 (temporaire)
+├── signup-form.tsx           ← ✅ Étape 5 (temporaire)  
+├── oauth-buttons.tsx         ← ⏳ Étape 8 (Composants React)
+├── logout-button.tsx         ← ⏳ Étape 8 (Composants React)
+├── user-menu.tsx             ← ⏳ Étape 9 (Interface utilisateur)
+└── auth-guard.tsx            ← ⏳ Étape 10 (Protection de routes)
+```
+
+**Planning des étapes** :
+- **Étape 5 (ACTUELLE)** : Configuration NextAuth.js + composants temporaires
+- **Étape 6** : Types TypeScript avancés  
+- **Étape 7** : Types pour toute l'application
+- **Étape 8** : Composants React d'authentification (VRAIS formulaires)
+- **Étape 9** : Interface utilisateur complète
+- **Étape 10** : Protection de routes et sécurité
+
+**À RETENIR** :
+- ❌ **NE PAS** créer les autres fichiers maintenant
+- ✅ **SEULEMENT** signin-form.tsx et signup-form.tsx pour l'instant
+- ✅ Les autres fichiers seront créés dans les prochaines étapes avec le code complet
 
 ## Types TypeScript pour NextAuth.js
 
@@ -1171,9 +1316,9 @@ GITHUB_CLIENT_SECRET="prod-github-client-secret"
 
 Avant de passer aux étapes suivantes, vérifie que tous ces éléments sont en place :
 
-**Structure des fichiers** :
+**Structure des fichiers (OBLIGATOIRES pour cette étape)** :
 - [ ] `src/lib/auth-config.ts` - Configuration NextAuth
-- [ ] `src/lib/auth.ts` - Export des handlers NextAuth
+- [ ] `src/lib/auth.ts` - Export des handlers NextAuth  
 - [ ] `src/lib/password.ts` - Utilitaires mot de passe
 - [ ] `src/app/api/auth/[...nextauth]/route.ts` - Route API NextAuth
 - [ ] `src/app/auth/signin/page.tsx` - Page de connexion
@@ -1181,8 +1326,14 @@ Avant de passer aux étapes suivantes, vérifie que tous ces éléments sont en 
 - [ ] `src/app/auth/error/page.tsx` - Page d'erreur
 - [ ] `src/middleware.ts` - Middleware de protection
 - [ ] `src/types/next-auth.d.ts` - Types TypeScript
-- [ ] `src/components/auth/signin-form.tsx` - Composant temporaire
-- [ ] `src/components/auth/signup-form.tsx` - Composant temporaire
+- [ ] `src/components/auth/signin-form.tsx` - Composant temporaire (CRÉÉ MANUELLEMENT)
+- [ ] `src/components/auth/signup-form.tsx` - Composant temporaire (CRÉÉ MANUELLEMENT)
+
+**Fichiers QUI NE DOIVENT PAS exister maintenant** :
+- [ ] ❌ `src/components/auth/oauth-buttons.tsx` - Sera créé à l'étape 8
+- [ ] ❌ `src/components/auth/logout-button.tsx` - Sera créé à l'étape 8  
+- [ ] ❌ `src/components/auth/user-menu.tsx` - Sera créé à l'étape 9
+- [ ] ❌ `src/components/auth/auth-guard.tsx` - Sera créé à l'étape 10
 
 **Variables d'environnement** :
 - [ ] `NEXTAUTH_SECRET` - Clé secrète générée
@@ -1207,8 +1358,47 @@ Avant de passer aux étapes suivantes, vérifie que tous ces éléments sont en 
 
 **Commandes de vérification rapide** :
 ```bash
-# Test complet en une commande
-npm run dev & sleep 5 && curl -I http://localhost:3000/auth/signin && curl -I http://localhost:3000/api/auth/signin && kill %1
+# Vérification structure des fichiers obligatoires
+echo "=== VÉRIFICATION STRUCTURE ÉTAPE 5 ==="
+echo "Fichiers obligatoires :"
+for file in "src/lib/auth-config.ts" "src/lib/auth.ts" "src/app/api/auth/[...nextauth]/route.ts" "src/app/auth/signin/page.tsx" "src/components/auth/signin-form.tsx"; do
+  if [ -f "$file" ]; then
+    echo "✅ $file"
+  else
+    echo "❌ $file MANQUANT"
+  fi
+done
+
+echo ""
+echo "Fichiers qui NE DOIVENT PAS exister :"
+for file in "src/components/auth/oauth-buttons.tsx" "src/components/auth/logout-button.tsx" "src/components/auth/user-menu.tsx"; do
+  if [ ! -f "$file" ]; then
+    echo "✅ $file (correct - pas encore créé)"
+  else
+    echo "⚠️ $file existe déjà (pas grave mais pas nécessaire maintenant)"
+  fi
+done
+
+echo ""
+echo "Test serveur de développement :"
+npm run dev & SERVER_PID=$!
+sleep 8
+curl -s -I http://localhost:3000/auth/signin | head -1
+curl -s -I http://localhost:3000/api/auth/signin | head -1
+kill $SERVER_PID
+echo "=== FIN VÉRIFICATION ==="
+```
+
+**Commande simple pour débutants** :
+```bash
+# Juste vérifier que les fichiers principaux existent
+ls -la src/components/auth/
+ls -la src/app/auth/signin/
+ls -la src/lib/
+
+# Puis démarrer le serveur et tester dans le navigateur
+npm run dev
+# Aller sur http://localhost:3000/auth/signin
 ```
 
 Si tous les éléments sont cochés, l'étape 5 est terminée avec succès !
