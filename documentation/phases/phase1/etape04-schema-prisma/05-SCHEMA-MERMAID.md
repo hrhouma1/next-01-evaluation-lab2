@@ -7,91 +7,91 @@ Le diagramme ci-dessous représente l'ensemble du schéma de base de données de
 ```mermaid
 erDiagram
     User {
-        string id PK "Identifiant unique"
-        string email UK "Email (unique)"
-        string password "Mot de passe hashé"
-        string name "Nom complet"
-        Role role "USER ou ADMIN"
-        datetime emailVerified "Email vérifié"
-        string image "Avatar URL"
-        datetime createdAt "Date création"
-        datetime updatedAt "Date modification"
+        string id PK
+        string email UK
+        string password
+        string name
+        Role role
+        datetime emailVerified
+        string image
+        datetime createdAt
+        datetime updatedAt
     }
     
     Photo {
-        string id PK "Identifiant unique"
-        string title "Titre de la photo"
-        string description "Description"
-        string imageUrl "URL de l'image"
-        float price "Prix en euros"
-        PhotoStatus status "DRAFT, PUBLISHED, SOLD, ARCHIVED"
-        string[] tags "Tags de recherche"
-        string userId FK "Propriétaire"
-        datetime createdAt "Date création"
-        datetime updatedAt "Date modification"
+        string id PK
+        string title
+        string description
+        string imageUrl
+        float price
+        PhotoStatus status
+        string[] tags
+        string userId FK
+        datetime createdAt
+        datetime updatedAt
     }
     
     Purchase {
-        string id PK "Identifiant unique"
-        string stripeSessionId UK "ID session Stripe"
-        string stripePaymentId "ID paiement Stripe"
-        float amount "Montant payé"
-        string currency "Devise (EUR)"
-        string status "pending, completed, failed"
-        string userId FK "Acheteur"
-        string photoId FK "Photo achetée"
-        datetime createdAt "Date achat"
-        datetime updatedAt "Date modification"
+        string id PK
+        string stripeSessionId UK
+        string stripePaymentId
+        float amount
+        string currency
+        string status
+        string userId FK
+        string photoId FK
+        datetime createdAt
+        datetime updatedAt
     }
     
     Account {
-        string id PK "Identifiant unique"
-        string userId FK "Utilisateur lié"
-        string type "oauth, email"
-        string provider "google, github"
-        string providerAccountId "ID compte provider"
-        string refresh_token "Token rafraîchissement"
-        string access_token "Token d'accès"
-        int expires_at "Expiration token"
-        string token_type "Type de token"
-        string scope "Portée des permissions"
-        string id_token "Token d'identité"
-        string session_state "État de session"
+        string id PK
+        string userId FK
+        string type
+        string provider
+        string providerAccountId
+        string refresh_token
+        string access_token
+        int expires_at
+        string token_type
+        string scope
+        string id_token
+        string session_state
     }
     
     Session {
-        string id PK "Identifiant unique"
-        string sessionToken UK "Token de session"
-        string userId FK "Utilisateur connecté"
-        datetime expires "Date d'expiration"
+        string id PK
+        string sessionToken UK
+        string userId FK
+        datetime expires
     }
     
     VerificationToken {
-        string identifier "Email ou phone"
-        string token UK "Token de vérification"
-        datetime expires "Date d'expiration"
+        string identifier
+        string token UK
+        datetime expires
     }
 
     %% Relations principales
-    User ||--o{ Photo : "possède (1:N)"
-    User ||--o{ Purchase : "effectue (1:N)"
-    Photo ||--o{ Purchase : "est achetée (1:N)"
+    User ||--o{ Photo : possede
+    User ||--o{ Purchase : effectue
+    Photo ||--o{ Purchase : achetee
     
     %% Relations NextAuth.js
-    User ||--o{ Account : "authentification (1:N)"
-    User ||--o{ Session : "sessions actives (1:N)"
+    User ||--o{ Account : authentification
+    User ||--o{ Session : sessions
     
     %% Énumérations
     Role {
-        USER "Utilisateur standard"
-        ADMIN "Administrateur"
+        USER
+        ADMIN
     }
     
     PhotoStatus {
-        DRAFT "Brouillon"
-        PUBLISHED "Publié"
-        SOLD "Vendu"
-        ARCHIVED "Archivé"
+        DRAFT
+        PUBLISHED
+        SOLD
+        ARCHIVED
     }
 ```
 
@@ -118,6 +118,65 @@ erDiagram
 | `string[]` | Tableau de chaînes | ["nature", "sunset", "beach"] |
 | `Role` | Énumération | USER ou ADMIN |
 | `PhotoStatus` | Énumération | DRAFT, PUBLISHED, SOLD, ARCHIVED |
+
+### Description détaillée des champs
+
+#### Entité User
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | string PK | Identifiant unique généré automatiquement |
+| `email` | string UK | Adresse email (unique) |
+| `password` | string | Mot de passe hashé |
+| `name` | string | Nom complet de l'utilisateur |
+| `role` | Role | Rôle USER ou ADMIN |
+| `emailVerified` | datetime | Date de vérification de l'email |
+| `image` | string | URL de l'avatar |
+| `createdAt` | datetime | Date de création du compte |
+| `updatedAt` | datetime | Date de dernière modification |
+
+#### Entité Photo
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | string PK | Identifiant unique de la photo |
+| `title` | string | Titre de la photo |
+| `description` | string | Description optionnelle |
+| `imageUrl` | string | URL de l'image stockée |
+| `price` | float | Prix en euros |
+| `status` | PhotoStatus | Statut de publication |
+| `tags` | string[] | Tags pour la recherche |
+| `userId` | string FK | Propriétaire de la photo |
+| `createdAt` | datetime | Date d'upload |
+| `updatedAt` | datetime | Date de modification |
+
+#### Entité Purchase
+| Champ | Type | Description |
+|-------|------|-------------|
+| `id` | string PK | Identifiant unique de l'achat |
+| `stripeSessionId` | string UK | ID de session Stripe (unique) |
+| `stripePaymentId` | string | ID du paiement Stripe confirmé |
+| `amount` | float | Montant payé |
+| `currency` | string | Devise (EUR par défaut) |
+| `status` | string | pending, completed, failed |
+| `userId` | string FK | Acheteur |
+| `photoId` | string FK | Photo achetée |
+| `createdAt` | datetime | Date de l'achat |
+| `updatedAt` | datetime | Date de modification |
+
+#### Énumérations
+
+**Role** - Rôles des utilisateurs :
+| Valeur | Description |
+|--------|-------------|
+| `USER` | Utilisateur standard (peut acheter et vendre des photos) |
+| `ADMIN` | Administrateur (accès complet à la gestion) |
+
+**PhotoStatus** - Statuts des photos :
+| Valeur | Description |
+|--------|-------------|
+| `DRAFT` | Photo en brouillon (non visible publiquement) |
+| `PUBLISHED` | Photo publiée (visible et achetable) |
+| `SOLD` | Photo vendue (plus disponible à l'achat) |
+| `ARCHIVED` | Photo archivée (retirée de la vente) |
 
 ## Relations détaillées
 
