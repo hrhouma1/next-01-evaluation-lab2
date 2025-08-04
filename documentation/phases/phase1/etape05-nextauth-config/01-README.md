@@ -510,6 +510,32 @@ export const config = {
 
 ## Pages d'authentification personnalisées
 
+### IMPORTANT : Structure des fichiers et URLs Next.js
+
+**URLs générées automatiquement par Next.js App Router** :
+
+| Dossier app | URL accessible dans le navigateur | Page rendue |
+|-------------|-----------------------------------|-------------|
+| `app/auth/signin/page.tsx` | `/auth/signin` | Page de connexion |
+| `app/auth/signup/page.tsx` | `/auth/signup` | Page d'inscription |
+| `app/auth/error/page.tsx` | `/auth/error` | Page d'erreur personnalisée |
+
+**Règles importantes** :
+- Les noms de fichiers doivent être `page.tsx` ou `page.jsx` pour que Next.js les reconnaisse comme des routes valides avec App Router
+- Chaque dossier de route doit contenir un fichier `page.tsx` obligatoire
+
+**Vérification rapide** :
+Assure-toi que dans chaque dossier (`signin`, `signup`, `error`), il y a bien un fichier :
+```
+page.tsx   ← obligatoire pour que ça fonctionne
+```
+
+**Exemple d'accès** :
+Si ton projet tourne en local avec Next.js (par exemple via `npm run dev`), tu peux visiter :
+- `http://localhost:3000/auth/signin`
+- `http://localhost:3000/auth/signup` 
+- `http://localhost:3000/auth/error`
+
 ### 8. Page de connexion
 
 **Créer `src/app/auth/signin/page.tsx`** :
@@ -652,6 +678,103 @@ export default function AuthErrorPage() {
   )
 }
 ```
+
+### IMPORTANT : Composants de base temporaires pour éviter les erreurs
+
+Les pages ci-dessus importent des composants (`SignInForm`, `SignUpForm`) qui ne sont pas encore créés. Pour éviter les erreurs de build, crée d'abord ces composants temporaires :
+
+**Créer `src/components/auth/signin-form.tsx`** :
+```tsx
+"use client"
+
+export function SignInForm() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <p className="text-blue-800 text-sm">
+          <strong>Composant temporaire</strong> - Le formulaire de connexion sera implémenté dans les prochaines étapes.
+        </p>
+      </div>
+      
+      <div className="space-y-4">
+        <p className="text-gray-600 text-center">
+          En attendant, utilisez les boutons NextAuth.js par défaut :
+        </p>
+        
+        <div className="space-y-3">
+          <a
+            href="/api/auth/signin"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Se connecter (NextAuth par défaut)
+          </a>
+          
+          <a
+            href="/"
+            className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Retour à l'accueil
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+**Créer `src/components/auth/signup-form.tsx`** :
+```tsx
+"use client"
+
+export function SignUpForm() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <p className="text-blue-800 text-sm">
+          <strong>Composant temporaire</strong> - Le formulaire d'inscription sera implémenté dans les prochaines étapes.
+        </p>
+      </div>
+      
+      <div className="space-y-4">
+        <p className="text-gray-600 text-center">
+          En attendant, utilisez les boutons NextAuth.js par défaut :
+        </p>
+        
+        <div className="space-y-3">
+          <a
+            href="/api/auth/signin"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Se connecter ou s'inscrire (NextAuth par défaut)
+          </a>
+          
+          <a
+            href="/"
+            className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Retour à l'accueil
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+**Créer le dossier des composants** :
+```bash
+# Créer la structure des composants
+mkdir -p src/components/auth
+
+# Les fichiers signin-form.tsx et signup-form.tsx doivent être créés avec le contenu ci-dessus
+```
+
+**Vérification des composants** :
+Une fois les composants créés, vérifie que :
+- [ ] Le dossier `src/components/auth/` existe
+- [ ] Le fichier `signin-form.tsx` existe et contient le composant `SignInForm`
+- [ ] Le fichier `signup-form.tsx` existe et contient le composant `SignUpForm`
+- [ ] Aucune erreur de build `Module not found` dans la console
 
 ## Types TypeScript pour NextAuth.js
 
@@ -822,6 +945,141 @@ node test-auth.js
 rm test-auth.js
 ```
 
+## Diagnostic et résolution des erreurs
+
+### Erreurs courantes et solutions
+
+**1. Erreur "Module not found: Can't resolve '@/components/auth/signin-form'"**
+
+**Cause** : Les composants importés dans les pages n'existent pas encore.
+
+**Solution** :
+```bash
+# Créer la structure manquante
+mkdir -p src/components/auth
+
+# Créer les composants temporaires (voir section précédente)
+# Ou utiliser la page par défaut NextAuth.js temporairement
+```
+
+**Alternative temporaire** - Modifier les pages pour utiliser NextAuth.js par défaut :
+```tsx
+// Dans src/app/auth/signin/page.tsx - Version sans composant personnalisé
+export default function SignInPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 text-center">
+        <h2 className="text-3xl font-extrabold text-gray-900">
+          Connexion à PhotoMarket
+        </h2>
+        <a 
+          href="/api/auth/signin"
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+        >
+          Se connecter avec NextAuth.js
+        </a>
+      </div>
+    </div>
+  )
+}
+```
+
+**2. Erreur "Cannot find module '@/lib/auth'"**
+
+**Cause** : Le chemin d'alias `@/` n'est pas configuré ou le fichier n'existe pas.
+
+**Solution** :
+```bash
+# Vérifier que tsconfig.json contient les chemins d'alias
+grep -A 5 '"paths"' tsconfig.json
+
+# Vérifier que le fichier auth.ts existe
+ls -la src/lib/auth.ts
+
+# Si manquant, créer le fichier (voir section 3 du guide)
+```
+
+**3. Erreur "Prisma Client not found"**
+
+**Cause** : Prisma n'est pas généré ou configuré.
+
+**Solution** :
+```bash
+# Régénérer Prisma
+npx prisma generate
+
+# Vérifier la connexion
+npx prisma db push
+
+# Test de connexion
+node -e "const { PrismaClient } = require('@prisma/client'); new PrismaClient().\$connect().then(() => console.log('OK')).catch(e => console.error(e))"
+```
+
+**4. Erreur "NEXTAUTH_SECRET is not defined"**
+
+**Cause** : Variable d'environnement manquante.
+
+**Solution** :
+```bash
+# Générer un secret
+node -e "console.log('NEXTAUTH_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"
+
+# Ajouter dans .env
+echo "NEXTAUTH_SECRET=votre-secret-généré" >> .env
+
+# Redémarrer le serveur
+npm run dev
+```
+
+**5. Erreur de route 404 sur /auth/signin**
+
+**Cause** : Structure de fichiers incorrecte.
+
+**Solution** :
+```bash
+# Vérifier la structure exacte
+find src/app -name "page.tsx" | grep auth
+
+# Doit afficher :
+# src/app/auth/signin/page.tsx
+# src/app/auth/signup/page.tsx  
+# src/app/auth/error/page.tsx
+
+# Si manquant, créer les dossiers et fichiers
+mkdir -p src/app/auth/{signin,signup,error}
+```
+
+### Tests de vérification rapide
+
+**Test 1 : Vérifier les URLs NextAuth.js**
+```bash
+# Démarrer le serveur
+npm run dev
+
+# Tester les URLs (dans un autre terminal)
+curl -I http://localhost:3000/api/auth/signin
+curl -I http://localhost:3000/auth/signin
+curl -I http://localhost:3000/auth/signup
+```
+
+**Test 2 : Vérifier la configuration**
+```bash
+# Test des variables d'environnement
+node -e "console.log('NEXTAUTH_SECRET:', !!process.env.NEXTAUTH_SECRET); console.log('DATABASE_URL:', !!process.env.DATABASE_URL)"
+
+# Test import des modules
+node -e "try { require('./src/lib/auth-config'); console.log('✅ auth-config OK'); } catch(e) { console.log('❌', e.message); }"
+```
+
+**Test 3 : Vérifier les types TypeScript**
+```bash
+# Compilation TypeScript
+npx tsc --noEmit
+
+# Si erreurs, vérifier que next-auth.d.ts existe
+ls -la src/types/next-auth.d.ts
+```
+
 ## Utilisation dans l'application
 
 ### 16. Hooks et utilitaires côté client
@@ -908,6 +1166,52 @@ GITHUB_CLIENT_SECRET="prod-github-client-secret"
 - ✅ Middleware de protection correctement configuré
 - ✅ Validation des rôles côté serveur
 - ✅ Mots de passe hashés avec bcrypt (saltRounds >= 12)
+
+### Checklist de vérification finale
+
+Avant de passer aux étapes suivantes, vérifie que tous ces éléments sont en place :
+
+**Structure des fichiers** :
+- [ ] `src/lib/auth-config.ts` - Configuration NextAuth
+- [ ] `src/lib/auth.ts` - Export des handlers NextAuth
+- [ ] `src/lib/password.ts` - Utilitaires mot de passe
+- [ ] `src/app/api/auth/[...nextauth]/route.ts` - Route API NextAuth
+- [ ] `src/app/auth/signin/page.tsx` - Page de connexion
+- [ ] `src/app/auth/signup/page.tsx` - Page d'inscription
+- [ ] `src/app/auth/error/page.tsx` - Page d'erreur
+- [ ] `src/middleware.ts` - Middleware de protection
+- [ ] `src/types/next-auth.d.ts` - Types TypeScript
+- [ ] `src/components/auth/signin-form.tsx` - Composant temporaire
+- [ ] `src/components/auth/signup-form.tsx` - Composant temporaire
+
+**Variables d'environnement** :
+- [ ] `NEXTAUTH_SECRET` - Clé secrète générée
+- [ ] `NEXTAUTH_URL` - URL de l'application
+- [ ] `DATABASE_URL` - URL de base de données Neon
+- [ ] `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` (optionnel)
+- [ ] `GITHUB_CLIENT_ID` et `GITHUB_CLIENT_SECRET` (optionnel)
+
+**Tests fonctionnels** :
+- [ ] `npm run dev` démarre sans erreur
+- [ ] `/api/auth/signin` accessible (page NextAuth par défaut)
+- [ ] `/auth/signin` accessible (page personnalisée)
+- [ ] `/auth/signup` accessible (page personnalisée)
+- [ ] `/auth/error` accessible (page d'erreur)
+- [ ] Aucune erreur "Module not found" dans la console
+- [ ] TypeScript compile sans erreur (`npx tsc --noEmit`)
+
+**Base de données** :
+- [ ] Tables NextAuth.js créées (User, Account, Session, VerificationToken)
+- [ ] Connexion Prisma fonctionnelle
+- [ ] `npx prisma db push` réussi
+
+**Commandes de vérification rapide** :
+```bash
+# Test complet en une commande
+npm run dev & sleep 5 && curl -I http://localhost:3000/auth/signin && curl -I http://localhost:3000/api/auth/signin && kill %1
+```
+
+Si tous les éléments sont cochés, l'étape 5 est terminée avec succès !
 
 ## Livrables de l'étape 5
 
