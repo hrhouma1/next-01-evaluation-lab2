@@ -1,84 +1,98 @@
-# Étape 6 : Commandes Types NextAuth.js avancés
+# Étape 6 : Commandes et Scripts - Types NextAuth.js avancés
 
-## Commandes d'installation et configuration
+## Vue d'ensemble
 
-### Installation des dépendances TypeScript
+Ce document liste **TOUTES les commandes** nécessaires pour l'Étape 6 : Types NextAuth.js avancés. Chaque commande est expliquée et contextualisée pour les ultra-débutants.
+
+## Prérequis - Vérifications obligatoires
+
+### Vérifier que l'étape 5 est terminée
 
 ```bash
-# Naviguer dans le projet
-cd photo-marketplace
+# Vérifier que NextAuth.js est configuré
+ls -la src/lib/auth*
+ls -la src/app/api/auth/
+ls -la src/app/auth/
+ls -la src/components/auth/
 
-# Installer Zod pour la validation avec types
+# Doit afficher :
+# src/lib/auth-config.ts
+# src/lib/auth.ts  
+# src/lib/password.ts
+# src/app/api/auth/[...nextauth]/
+# src/app/auth/signin/
+# src/app/auth/signup/
+# src/app/auth/error/
+# src/components/auth/signin-form.tsx
+# src/components/auth/signup-form.tsx
+```
+
+### Vérifier la configuration TypeScript
+
+```bash
+# Vérifier que TypeScript est configuré
+cat tsconfig.json | grep -A 5 -B 5 "strict"
+
+# Vérifier les types NextAuth existants
+ls -la src/types/
+cat src/types/next-auth.d.ts
+
+# Si le dossier types n'existe pas :
+mkdir -p src/types
+```
+
+## Installation des dépendances
+
+### 1. Installation de Zod (validation de schémas)
+
+```bash
+# Installer Zod pour la validation TypeScript
 npm install zod
-npm install @types/zod -D
 
-# Installer validator pour validations avancées
+# Installer les types de développement
+npm install @types/zod --save-dev
+
+# Vérifier l'installation
+npm list zod
+# Doit afficher : zod@X.X.X
+```
+
+### 2. Installation de validator (validation avancée)
+
+```bash
+# Installer validator pour validations email/password avancées
 npm install validator
-npm install @types/validator -D
 
-# Installer les utilitaires de test TypeScript
-npm install -D vitest @vitest/ui
-npm install -D @types/node
+# Installer les types
+npm install @types/validator --save-dev
 
-# Vérifier les versions installées
-npm list zod validator vitest
+# Vérifier l'installation
+npm list validator
+# Doit afficher : validator@X.X.X
 ```
 
-### Configuration TypeScript avancée
+### 3. Installation de vitest (tests TypeScript)
 
 ```bash
-# Sauvegarder la configuration actuelle
-cp tsconfig.json tsconfig.json.backup
+# Installer vitest pour tester les types
+npm install --save-dev vitest @vitest/ui
 
-# Créer la configuration TypeScript stricte
-cat > tsconfig.json << 'EOF'
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "ES2022"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/hooks/*": ["./src/hooks/*"]
-    },
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-EOF
+# Installer les types Node.js pour les tests
+npm install --save-dev @types/node
 
-# Vérifier la configuration TypeScript
-npx tsc --noEmit
+# Vérifier l'installation
+npm list vitest
+# Doit afficher : vitest@X.X.X
 ```
 
-## Commandes de création de la structure de types
+## Création de la structure des dossiers
 
-### Création de la structure de dossiers
+### 1. Créer l'arborescence des types
 
 ```bash
-# Créer l'arborescence complète des types
+# Créer tous les dossiers nécessaires EN UNE SEULE FOIS
 mkdir -p src/types/auth
-mkdir -p src/types/database
+mkdir -p src/types/database  
 mkdir -p src/types/api
 mkdir -p src/types/utils
 mkdir -p src/lib/auth
@@ -87,13 +101,25 @@ mkdir -p src/types/__tests__
 
 # Vérifier la structure créée
 find src/types -type d | sort
-tree src/types 2>/dev/null || find src/types -type d
+# Doit afficher :
+# src/types
+# src/types/__tests__
+# src/types/api
+# src/types/auth
+# src/types/database
+# src/types/utils
+
+find src/lib -type d | sort
+# Doit afficher :
+# src/lib
+# src/lib/auth
+# src/lib/types
 ```
 
-### Création des fichiers de types de base
+### 2. Créer les fichiers vides (préparation)
 
 ```bash
-# Créer tous les fichiers de types principaux
+# Types d'authentification
 touch src/types/auth/index.ts
 touch src/types/auth/session.ts
 touch src/types/auth/user.ts
@@ -102,1029 +128,537 @@ touch src/types/auth/callbacks.ts
 touch src/types/auth/middleware.ts
 touch src/types/auth/forms.ts
 
-# Créer les fichiers utilitaires
+# Types de base de données
+touch src/types/database/prisma-extended.ts
+touch src/types/database/relations.ts
+
+# Types d'API
+touch src/types/api/auth-responses.ts
+touch src/types/api/errors.ts
+
+# Types utilitaires
 touch src/types/utils/branded-types.ts
 touch src/types/utils/validation.ts
 touch src/types/utils/permissions.ts
 
-# Créer les fichiers de base de données
-touch src/types/database/prisma-extended.ts
-touch src/types/database/relations.ts
-
-# Créer les fichiers API
-touch src/types/api/auth-responses.ts
-touch src/types/api/errors.ts
-
-# Créer les fichiers de bibliothèque
-touch src/lib/auth/validators.ts
+# Utilitaires d'authentification
 touch src/lib/auth/type-guards.ts
+touch src/lib/auth/validators.ts
 touch src/lib/auth/permissions-utils.ts
+
+# Helpers de types
 touch src/lib/types/type-helpers.ts
 
+# Tests
+touch src/types/__tests__/auth-types.test.ts
+
 # Vérifier que tous les fichiers sont créés
-find src/types src/lib -name "*.ts" | wc -l
-ls -la src/types/auth/
-ls -la src/lib/auth/
+find src/types -name "*.ts" | wc -l
+# Doit afficher : 13
+find src/lib -name "*.ts" | wc -l  
+# Doit afficher : 4 (+ les fichiers existants de l'étape 5)
 ```
 
-## Commandes de validation et test des types
+## Commandes de développement pour chaque fichier
 
-### Tests de compilation TypeScript
+### 1. Commandes pour src/types/auth/session.ts
 
 ```bash
-# Test 1 : Compilation TypeScript stricte
-npx tsc --noEmit --strict
+# Ouvrir le fichier pour édition
+code src/types/auth/session.ts
+# OU avec votre éditeur préféré :
+nano src/types/auth/session.ts
+# OU 
+vim src/types/auth/session.ts
 
-# Test 2 : Vérification des types sans émission
-npx tsc --noEmit --skipLibCheck false
+# Après avoir collé le code du README :
+# Vérifier la syntaxe TypeScript
+npx tsc --noEmit src/types/auth/session.ts
 
-# Test 3 : Analyse des erreurs TypeScript
-npx tsc --noEmit 2>&1 | head -20
-
-# Test 4 : Vérification des imports
-node -e "
-try {
-  const types = require('./src/types/auth/index.ts');
-  console.log('✅ Types importables');
-} catch (error) {
-  console.log('❌ Erreur import types:', error.message);
-}
-"
+# Si erreur de syntaxe, corriger et retester
+npx tsc --noEmit src/types/auth/session.ts
 ```
 
-### Tests de validation Zod
+### 2. Commandes pour src/types/auth/user.ts
 
 ```bash
-# Créer un script de test Zod rapide
-cat > test-zod-validation.js << 'EOF'
-const { z } = require('zod');
+# Ouvrir et éditer
+code src/types/auth/user.ts
 
-// Test des schémas de validation de base
-const emailSchema = z.string().email();
-const passwordSchema = z.string().min(8);
+# Après édition, vérifier la syntaxe
+npx tsc --noEmit src/types/auth/user.ts
 
-console.log('=== TESTS VALIDATION ZOD ===');
-
-// Test email valide
-try {
-  emailSchema.parse('test@photomarket.com');
-  console.log('✅ Email valide accepté');
-} catch (error) {
-  console.log('❌ Email valide rejeté:', error.message);
-}
-
-// Test email invalide
-try {
-  emailSchema.parse('email-invalide');
-  console.log('❌ Email invalide accepté');
-} catch (error) {
-  console.log('✅ Email invalide rejeté');
-}
-
-// Test mot de passe valide
-try {
-  passwordSchema.parse('motdepasse123');
-  console.log('✅ Mot de passe valide accepté');
-} catch (error) {
-  console.log('❌ Mot de passe valide rejeté:', error.message);
-}
-
-// Test mot de passe invalide
-try {
-  passwordSchema.parse('123');
-  console.log('❌ Mot de passe invalide accepté');
-} catch (error) {
-  console.log('✅ Mot de passe invalide rejeté');
-}
-
-console.log('=== TESTS ZOD TERMINÉS ===');
-EOF
-
-# Exécuter les tests
-node test-zod-validation.js
-
-# Nettoyer
-rm test-zod-validation.js
+# Vérifier les imports (après avoir créé session.ts)
+npx tsc --noEmit src/types/auth/user.ts
 ```
 
-### Tests des type guards
+### 3. Commandes pour src/types/auth/providers.ts
 
 ```bash
-# Créer un script de test des type guards
-cat > test-type-guards.js << 'EOF'
-// Import simulé des type guards (adaptation pour Node.js)
-function isValidUserRole(role) {
-  return ["USER", "ADMIN"].includes(role);
-}
+# Ouvrir et éditer
+code src/types/auth/providers.ts
 
-function isValidUserStatus(status) {
-  return ["ACTIVE", "SUSPENDED", "PENDING_VERIFICATION", "INACTIVE"].includes(status);
-}
+# Vérifier la syntaxe
+npx tsc --noEmit src/types/auth/providers.ts
 
-function isValidOAuthProvider(provider) {
-  return ["google", "github", "facebook", "twitter", "linkedin"].includes(provider);
-}
-
-console.log('=== TESTS TYPE GUARDS ===');
-
-// Test rôles utilisateur
-console.log('Rôle USER valide:', isValidUserRole('USER'));
-console.log('Rôle ADMIN valide:', isValidUserRole('ADMIN'));
-console.log('Rôle INVALID invalide:', !isValidUserRole('INVALID'));
-
-// Test statuts utilisateur
-console.log('Statut ACTIVE valide:', isValidUserStatus('ACTIVE'));
-console.log('Statut SUSPENDED valide:', isValidUserStatus('SUSPENDED'));
-console.log('Statut INVALID invalide:', !isValidUserStatus('INVALID'));
-
-// Test providers OAuth
-console.log('Provider google valide:', isValidOAuthProvider('google'));
-console.log('Provider github valide:', isValidOAuthProvider('github'));
-console.log('Provider invalid invalide:', !isValidOAuthProvider('invalid'));
-
-console.log('=== TESTS TYPE GUARDS TERMINÉS ===');
-EOF
-
-node test-type-guards.js
-rm test-type-guards.js
+# Vérifier que les types NextAuth sont disponibles
+npm list next-auth
+# Doit afficher : next-auth@X.X.X
 ```
 
-## Commandes de test avec Vitest
-
-### Configuration Vitest
+### 4. Commandes pour src/types/auth/callbacks.ts
 
 ```bash
-# Créer la configuration Vitest
-cat > vite.config.ts << 'EOF'
-import { defineConfig } from 'vite'
-import { resolve } from 'path'
+# Ouvrir et éditer
+code src/types/auth/callbacks.ts
+
+# Vérifier la syntaxe et les imports
+npx tsc --noEmit src/types/auth/callbacks.ts
+```
+
+### 5. Commandes pour src/types/auth/middleware.ts
+
+```bash
+# Ouvrir et éditer
+code src/types/auth/middleware.ts
+
+# Vérifier la syntaxe
+npx tsc --noEmit src/types/auth/middleware.ts
+
+# Vérifier que les types Next.js sont disponibles
+npm list next
+# Doit afficher : next@X.X.X
+```
+
+### 6. Commandes pour src/types/auth/forms.ts
+
+```bash
+# Ouvrir et éditer
+code src/types/auth/forms.ts
+
+# Vérifier la syntaxe
+npx tsc --noEmit src/types/auth/forms.ts
+
+# Vérifier que Zod est installé
+npm list zod
+```
+
+## Commandes pour les utilitaires et validateurs
+
+### 1. Créer src/lib/auth/validators.ts
+
+```bash
+# Ouvrir pour édition
+code src/lib/auth/validators.ts
+
+# Après création, tester les imports Zod
+npx tsc --noEmit src/lib/auth/validators.ts
+
+# Tester validator
+node -e "const validator = require('validator'); console.log('Validator installé :', typeof validator.isEmail)"
+# Doit afficher : Validator installé : function
+```
+
+### 2. Créer src/lib/auth/type-guards.ts
+
+```bash
+# Ouvrir pour édition
+code src/lib/auth/type-guards.ts
+
+# Vérifier la syntaxe et les imports des types
+npx tsc --noEmit src/lib/auth/type-guards.ts
+```
+
+### 3. Créer src/lib/auth/permissions-utils.ts
+
+```bash
+# Ouvrir pour édition
+code src/lib/auth/permissions-utils.ts
+
+# Vérifier la syntaxe
+npx tsc --noEmit src/lib/auth/permissions-utils.ts
+```
+
+### 4. Créer src/types/utils/branded-types.ts
+
+```bash
+# Ouvrir pour édition
+code src/types/utils/branded-types.ts
+
+# Vérifier la syntaxe
+npx tsc --noEmit src/types/utils/branded-types.ts
+```
+
+### 5. Créer l'index principal src/types/auth/index.ts
+
+```bash
+# Ouvrir pour édition
+code src/types/auth/index.ts
+
+# Après création, vérifier tous les exports
+npx tsc --noEmit src/types/auth/index.ts
+```
+
+## Configuration TypeScript
+
+### 1. Mettre à jour tsconfig.json
+
+```bash
+# Faire une sauvegarde du tsconfig.json actuel
+cp tsconfig.json tsconfig.json.backup
+
+# Ouvrir pour édition
+code tsconfig.json
+
+# Après modification, valider la configuration
+npx tsc --showConfig
+
+# Tester la compilation de tout le projet
+npx tsc --noEmit
+
+# Si erreurs, restaurer la sauvegarde et corriger :
+# cp tsconfig.json.backup tsconfig.json
+```
+
+### 2. Vérifier les chemins d'alias
+
+```bash
+# Tester que les alias fonctionnent
+npx tsc --noEmit --showConfig | grep -A 10 "paths"
+
+# Doit afficher les chemins configurés :
+# "@/*": ["./src/*"]
+# "@/types/*": ["./src/types/*"]
+# etc.
+```
+
+## Configuration des tests
+
+### 1. Créer le fichier de configuration vitest
+
+```bash
+# Créer vitest.config.ts
+touch vitest.config.ts
+code vitest.config.ts
+
+# Coller la configuration :
+cat > vitest.config.ts << 'EOF'
+import { defineConfig } from 'vitest/config'
+import path from 'path'
 
 export default defineConfig({
   test: {
-    globals: true,
     environment: 'node',
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@/types': resolve(__dirname, './src/types'),
-      '@/lib': resolve(__dirname, './src/lib'),
+      '@': path.resolve(__dirname, './src'),
+      '@/types': path.resolve(__dirname, './src/types'),
+      '@/lib': path.resolve(__dirname, './src/lib'),
     },
   },
 })
 EOF
-
-# Ajouter les scripts de test dans package.json
-node -e "
-const fs = require('fs');
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-pkg.scripts = pkg.scripts || {};
-pkg.scripts['test:types'] = 'vitest run src/types/__tests__';
-pkg.scripts['test:types:watch'] = 'vitest src/types/__tests__';
-pkg.scripts['test:types:ui'] = 'vitest --ui src/types/__tests__';
-fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-console.log('✅ Scripts de test ajoutés');
-"
 ```
 
-### Création des tests TypeScript
+### 2. Créer les tests TypeScript
 
 ```bash
-# Créer le fichier de test principal
-cat > src/types/__tests__/auth-types.test.ts << 'EOF'
-import { describe, it, expect, expectTypeOf } from 'vitest'
+# Ouvrir le fichier de test
+code src/types/__tests__/auth-types.test.ts
 
-// Types simulés pour les tests
-type UserRole = "USER" | "ADMIN"
-type UserStatus = "ACTIVE" | "SUSPENDED" | "PENDING_VERIFICATION" | "INACTIVE"
+# Après création, exécuter les tests
+npx vitest run src/types/__tests__/auth-types.test.ts
 
-interface ExtendedUser {
-  id: string
-  email: string
-  name: string
-  role: UserRole
-  status: UserStatus
-  permissions: {
-    canUploadPhotos: boolean
-    canPurchasePhotos: boolean
-    canManageUsers: boolean
-    canAccessAdmin: boolean
-    canModerateContent: boolean
-  }
-}
+# Exécuter tous les tests TypeScript
+npx vitest run --typecheck
+```
 
-// Type guards simulés
-function isValidUserRole(role: string): role is UserRole {
-  return ["USER", "ADMIN"].includes(role)
-}
+### 3. Ajouter les scripts npm pour les tests
 
-function isExtendedUser(user: any): user is ExtendedUser {
-  return (
-    user &&
-    typeof user.id === 'string' &&
-    typeof user.email === 'string' &&
-    isValidUserRole(user.role) &&
-    user.permissions &&
-    typeof user.permissions === 'object'
-  )
-}
+```bash
+# Ouvrir package.json
+code package.json
 
-describe('Types d\'authentification', () => {
-  it('devrait valider les rôles utilisateur', () => {
-    expect(isValidUserRole('USER')).toBe(true)
-    expect(isValidUserRole('ADMIN')).toBe(true)
-    expect(isValidUserRole('INVALID')).toBe(false)
-  })
+# Ajouter ces scripts dans la section "scripts" :
+# "test": "vitest",
+# "test:run": "vitest run",
+# "test:types": "vitest run --typecheck",
+# "test:ui": "vitest --ui"
 
-  it('devrait valider un ExtendedUser', () => {
-    const validUser: ExtendedUser = {
-      id: 'user123',
-      email: 'test@example.com',
-      name: 'Test User',
-      role: 'USER',
-      status: 'ACTIVE',
-      permissions: {
-        canUploadPhotos: true,
-        canPurchasePhotos: true,
-        canManageUsers: false,
-        canAccessAdmin: false,
-        canModerateContent: false,
-      },
-    }
-
-    expect(isExtendedUser(validUser)).toBe(true)
-    expect(isExtendedUser({})).toBe(false)
-  })
-
-  it('devrait avoir les types corrects', () => {
-    expectTypeOf<UserRole>().toEqualTypeOf<'USER' | 'ADMIN'>()
-    expectTypeOf<ExtendedUser>().toHaveProperty('id').toEqualTypeOf<string>()
-    expectTypeOf<ExtendedUser>().toHaveProperty('role').toEqualTypeOf<UserRole>()
-  })
-})
-EOF
-
-# Exécuter les tests
+# Tester les nouveaux scripts
 npm run test:types
 ```
 
-## Commandes de validation des permissions
+## Commandes de vérification et validation
 
-### Test du système de permissions
+### 1. Validation complète du projet
 
 ```bash
-# Créer un script de test des permissions
-cat > test-permissions.js << 'EOF'
-// Simulation du système de permissions
-function calculateUserPermissions(role, status) {
-  const basePermissions = {
-    canUploadPhotos: false,
-    canPurchasePhotos: false,
-    canManageUsers: false,
-    canAccessAdmin: false,
-    canModerateContent: false,
-  }
-  
-  if (status !== 'ACTIVE') {
-    return basePermissions
-  }
-  
-  if (role === 'USER') {
-    basePermissions.canUploadPhotos = true
-    basePermissions.canPurchasePhotos = true
-  }
-  
-  if (role === 'ADMIN') {
-    return {
-      canUploadPhotos: true,
-      canPurchasePhotos: true,
-      canManageUsers: true,
-      canAccessAdmin: true,
-      canModerateContent: true,
-    }
-  }
-  
-  return basePermissions
-}
+# Vérifier que tout compile sans erreur
+npx tsc --noEmit
 
-function hasPermission(session, permission) {
-  if (!session || !session.user) return false
-  
-  const permissionMap = {
-    'photos:upload': 'canUploadPhotos',
-    'photos:purchase': 'canPurchasePhotos',
-    'users:manage': 'canManageUsers',
-    'admin:access': 'canAccessAdmin',
-    'admin:moderate': 'canModerateContent',
-  }
-  
-  const permissionKey = permissionMap[permission]
-  return session.user.permissions[permissionKey] || false
-}
+# Vérifier les imports circulaires
+npx madge --circular src/
 
-console.log('=== TESTS SYSTÈME DE PERMISSIONS ===')
-
-// Test utilisateur normal
-const userSession = {
-  user: {
-    id: 'user1',
-    role: 'USER',
-    status: 'ACTIVE',
-    permissions: calculateUserPermissions('USER', 'ACTIVE')
-  }
-}
-
-console.log('Utilisateur USER peut uploader:', hasPermission(userSession, 'photos:upload'))
-console.log('Utilisateur USER peut acheter:', hasPermission(userSession, 'photos:purchase'))
-console.log('Utilisateur USER peut administrer:', hasPermission(userSession, 'admin:access'))
-
-// Test administrateur
-const adminSession = {
-  user: {
-    id: 'admin1',
-    role: 'ADMIN',
-    status: 'ACTIVE',
-    permissions: calculateUserPermissions('ADMIN', 'ACTIVE')
-  }
-}
-
-console.log('Admin peut uploader:', hasPermission(adminSession, 'photos:upload'))
-console.log('Admin peut administrer:', hasPermission(adminSession, 'admin:access'))
-console.log('Admin peut modérer:', hasPermission(adminSession, 'admin:moderate'))
-
-// Test utilisateur suspendu
-const suspendedSession = {
-  user: {
-    id: 'suspended1',
-    role: 'USER',
-    status: 'SUSPENDED',
-    permissions: calculateUserPermissions('USER', 'SUSPENDED')
-  }
-}
-
-console.log('Utilisateur suspendu peut uploader:', hasPermission(suspendedSession, 'photos:upload'))
-console.log('Utilisateur suspendu peut acheter:', hasPermission(suspendedSession, 'photos:purchase'))
-
-console.log('=== TESTS PERMISSIONS TERMINÉS ===')
-EOF
-
-node test-permissions.js
-rm test-permissions.js
+# Si madge n'est pas installé :
+npm install -g madge
+npx madge --circular src/
 ```
 
-### Test des branded types
+### 2. Vérification des types spécifiques
 
 ```bash
-# Créer un script de test des branded types
-cat > test-branded-types.js << 'EOF'
-// Simulation des branded types pour Node.js
-function createUserId(id) {
-  if (typeof id !== 'string' || id.length === 0) {
-    throw new Error('UserId invalide')
-  }
-  return id // En TypeScript, ce serait castée comme UserId
-}
+# Tester l'import principal des types auth
+node -e "
+const types = require('./src/types/auth/index.ts');
+console.log('Types auth chargés avec succès');
+"
 
-function createEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    throw new Error('Email invalide')
-  }
-  return email.toLowerCase() // En TypeScript, ce serait castée comme Email
-}
-
-function createAmount(amount) {
-  if (typeof amount !== 'number' || amount < 0) {
-    throw new Error('Montant invalide')
-  }
-  return amount // En TypeScript, ce serait castée comme Amount
-}
-
-function createPrice(price) {
-  if (typeof price !== 'number' || price <= 0) {
-    throw new Error('Prix invalide')
-  }
-  return price // En TypeScript, ce serait castée comme Price
-}
-
-console.log('=== TESTS BRANDED TYPES ===')
-
-// Test UserId
-try {
-  const userId = createUserId('user123')
-  console.log('✅ UserId valide créé:', userId)
-} catch (error) {
-  console.log('❌ Erreur UserId:', error.message)
-}
-
-try {
-  createUserId('')
-  console.log('❌ UserId vide accepté')
-} catch (error) {
-  console.log('✅ UserId vide rejeté')
-}
-
-// Test Email
-try {
-  const email = createEmail('test@photomarket.com')
-  console.log('✅ Email valide créé:', email)
-} catch (error) {
-  console.log('❌ Erreur Email:', error.message)
-}
-
-try {
-  createEmail('email-invalide')
-  console.log('❌ Email invalide accepté')
-} catch (error) {
-  console.log('✅ Email invalide rejeté')
-}
-
-// Test Amount
-try {
-  const amount = createAmount(99.99)
-  console.log('✅ Montant valide créé:', amount)
-} catch (error) {
-  console.log('❌ Erreur Amount:', error.message)
-}
-
-try {
-  createAmount(-10)
-  console.log('❌ Montant négatif accepté')
-} catch (error) {
-  console.log('✅ Montant négatif rejeté')
-}
-
-// Test Price
-try {
-  const price = createPrice(29.99)
-  console.log('✅ Prix valide créé:', price)
-} catch (error) {
-  console.log('❌ Erreur Price:', error.message)
-}
-
-try {
-  createPrice(0)
-  console.log('❌ Prix zéro accepté')
-} catch (error) {
-  console.log('✅ Prix zéro rejeté')
-}
-
-console.log('=== TESTS BRANDED TYPES TERMINÉS ===')
-EOF
-
-node test-branded-types.js
-rm test-branded-types.js
+# Vérifier les validateurs Zod
+node -e "
+const { signInSchema } = require('./src/lib/auth/validators.ts');
+console.log('Validateurs Zod chargés avec succès');
+"
 ```
 
-## Commandes de validation des formulaires
-
-### Test des schémas de validation
+### 3. Tests de performance des types
 
 ```bash
-# Créer un script de test des schémas de formulaire
-cat > test-form-schemas.js << 'EOF'
-const { z } = require('zod')
+# Mesurer le temps de compilation
+time npx tsc --noEmit
 
-// Définition des schémas de validation
-const emailSchema = z.string()
-  .min(1, "L'email est obligatoire")
-  .email("Format d'email invalide")
-  .transform(email => email.toLowerCase().trim())
-
-const passwordSchema = z.string()
-  .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-  .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
-  .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
-  .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
-  .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial")
-
-const nameSchema = z.string()
-  .min(2, "Le nom doit contenir au moins 2 caractères")
-  .max(50, "Le nom ne peut pas dépasser 50 caractères")
-  .regex(/^[a-zA-ZÀ-ÿ\s-']+$/, "Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes")
-  .transform(name => name.trim())
-
-const signInSchema = z.object({
-  email: emailSchema,
-  password: z.string().min(1, "Le mot de passe est obligatoire"),
-  remember: z.boolean().optional(),
-})
-
-const signUpSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
-  password: passwordSchema,
-  confirmPassword: z.string(),
-  terms: z.boolean().refine(val => val === true, "Vous devez accepter les conditions d'utilisation"),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirmPassword"],
-})
-
-console.log('=== TESTS SCHÉMAS DE VALIDATION ===')
-
-// Test connexion valide
-try {
-  const signInData = signInSchema.parse({
-    email: 'test@photomarket.com',
-    password: 'motdepasse123',
-    remember: true
-  })
-  console.log('✅ Données de connexion valides:', signInData.email)
-} catch (error) {
-  console.log('❌ Erreur connexion valide:', error.errors?.[0]?.message || error.message)
-}
-
-// Test connexion invalide
-try {
-  signInSchema.parse({
-    email: 'email-invalide',
-    password: ''
-  })
-  console.log('❌ Données de connexion invalides acceptées')
-} catch (error) {
-  console.log('✅ Données de connexion invalides rejetées')
-}
-
-// Test inscription valide
-try {
-  const signUpData = signUpSchema.parse({
-    name: 'Jean Dupont',
-    email: 'jean@photomarket.com',
-    password: 'MotDePasse123!',
-    confirmPassword: 'MotDePasse123!',
-    terms: true
-  })
-  console.log('✅ Données d\'inscription valides:', signUpData.name)
-} catch (error) {
-  console.log('❌ Erreur inscription valide:', error.errors?.[0]?.message || error.message)
-}
-
-// Test inscription - mots de passe différents
-try {
-  signUpSchema.parse({
-    name: 'Jean Dupont',
-    email: 'jean@photomarket.com',
-    password: 'MotDePasse123!',
-    confirmPassword: 'AutreMotDePasse123!',
-    terms: true
-  })
-  console.log('❌ Mots de passe différents acceptés')
-} catch (error) {
-  console.log('✅ Mots de passe différents rejetés')
-}
-
-// Test inscription - conditions non acceptées
-try {
-  signUpSchema.parse({
-    name: 'Jean Dupont',
-    email: 'jean@photomarket.com',
-    password: 'MotDePasse123!',
-    confirmPassword: 'MotDePasse123!',
-    terms: false
-  })
-  console.log('❌ Conditions non acceptées mais données acceptées')
-} catch (error) {
-  console.log('✅ Conditions non acceptées rejetées')
-}
-
-// Test mot de passe faible
-try {
-  passwordSchema.parse('123')
-  console.log('❌ Mot de passe faible accepté')
-} catch (error) {
-  console.log('✅ Mot de passe faible rejeté:', error.errors?.[0]?.message || error.message)
-}
-
-console.log('=== TESTS SCHÉMAS TERMINÉS ===')
-EOF
-
-node test-form-schemas.js
-rm test-form-schemas.js
+# Analyser la taille des types générés
+npx tsc --noEmit --extendedDiagnostics
 ```
 
-## Commandes de développement et maintenance
+## Commandes de nettoyage et maintenance
 
-### Surveillance des types en temps réel
+### 1. Nettoyer les fichiers temporaires
 
 ```bash
-# Démarrer la surveillance TypeScript
-npx tsc --noEmit --watch &
-TSC_PID=$!
+# Supprimer les fichiers de cache TypeScript
+rm -rf .tsbuildinfo
+rm -rf tsconfig.tsbuildinfo
 
-# Démarrer les tests en mode watch
-npm run test:types:watch &
-TEST_PID=$!
+# Nettoyer le cache npm
+npm cache clean --force
 
-echo "TypeScript compiler PID: $TSC_PID"
-echo "Tests PID: $TEST_PID"
-
-# Pour arrêter plus tard
-# kill $TSC_PID $TEST_PID
+# Nettoyer node_modules si problème
+rm -rf node_modules
+npm install
 ```
 
-### Analyse de qualité du code TypeScript
+### 2. Réinitialiser en cas de problème
 
 ```bash
-# Installer ESLint avec règles TypeScript
-npm install -D @typescript-eslint/parser @typescript-eslint/eslint-plugin
+# Script de réinitialisation complète des types
+echo "Suppression des types créés..."
+rm -rf src/types/auth/*.ts
+rm -rf src/lib/auth/type-guards.ts
+rm -rf src/lib/auth/validators.ts
+rm -rf src/lib/auth/permissions-utils.ts
 
-# Créer la configuration ESLint
-cat > .eslintrc.js << 'EOF'
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking'
-  ],
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: 'module',
-    project: './tsconfig.json'
-  },
-  rules: {
-    '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/explicit-function-return-type': 'warn',
-    '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/prefer-nullish-coalescing': 'error',
-    '@typescript-eslint/prefer-optional-chain': 'error'
-  }
-}
-EOF
-
-# Lancer l'analyse ESLint
-npx eslint src/types/**/*.ts src/lib/**/*.ts
+echo "Recréation de la structure..."
+mkdir -p src/types/auth
+touch src/types/auth/index.ts
+# ... puis recréer tous les fichiers
 ```
 
-### Génération de documentation des types
+## Commandes utiles pour le développement
+
+### 1. Surveillance des changements TypeScript
 
 ```bash
-# Installer TypeDoc pour générer la documentation
+# Compiler en mode watch (surveillance)
+npx tsc --watch --noEmit
+
+# Exécuter les tests en mode watch
+npm run test
+
+# Surveiller les types spécifiquement
+npx tsc --watch --noEmit src/types/**/*.ts
+```
+
+### 2. Génération de documentation des types
+
+```bash
+# Installer typedoc pour la documentation
 npm install -D typedoc
 
-# Créer la configuration TypeDoc
-cat > typedoc.json << 'EOF'
-{
-  "entryPoints": ["src/types/auth/index.ts"],
-  "out": "docs/types",
-  "plugin": ["typedoc-plugin-markdown"],
-  "theme": "markdown",
-  "readme": "none",
-  "githubPages": false
-}
+# Générer la documentation des types
+npx typedoc src/types/auth/index.ts --out docs/types
+
+# Servir la documentation localement
+npx http-server docs/types
+# Aller sur http://localhost:8080
+```
+
+### 3. Analyse statique des types
+
+```bash
+# Installer ts-unused-exports
+npm install -D ts-unused-exports
+
+# Détecter les types non utilisés
+npx ts-unused-exports tsconfig.json
+
+# Analyser la complexité des types
+npx tsc --noEmit --extendedDiagnostics
+```
+
+## Commandes de débogage
+
+### 1. Déboguer les erreurs de types
+
+```bash
+# Voir les détails d'une erreur de type
+npx tsc --noEmit --pretty
+
+# Voir les types résolus pour un fichier
+npx tsc --noEmit --listFiles src/types/auth/session.ts
+
+# Tracer la résolution des modules
+npx tsc --noEmit --traceResolution src/types/auth/index.ts
+```
+
+### 2. Vérifier les dépendances des types
+
+```bash
+# Voir les dépendances d'un type
+npx madge src/types/auth/session.ts --image deps.png
+
+# Analyser les imports
+npx dependency-cruiser --output-type text src/types/
+```
+
+## Commandes de validation finale
+
+### 1. Check-list complète avant de passer à l'étape suivante
+
+```bash
+# Script de validation complète
+echo "=== VALIDATION ÉTAPE 6 ==="
+
+echo "1. Vérification des fichiers..."
+for file in "src/types/auth/session.ts" "src/types/auth/user.ts" "src/lib/auth/validators.ts"; do
+  if [ -f "$file" ]; then
+    echo "✅ $file"
+  else
+    echo "❌ $file MANQUANT"
+  fi
+done
+
+echo "2. Vérification compilation TypeScript..."
+if npx tsc --noEmit > /dev/null 2>&1; then
+  echo "✅ Compilation TypeScript"
+else
+  echo "❌ Erreurs de compilation TypeScript"
+fi
+
+echo "3. Vérification des tests..."
+if npm run test:types > /dev/null 2>&1; then
+  echo "✅ Tests TypeScript"
+else
+  echo "❌ Échec des tests TypeScript"
+fi
+
+echo "4. Vérification des dépendances..."
+for dep in "zod" "validator" "vitest"; do
+  if npm list $dep > /dev/null 2>&1; then
+    echo "✅ $dep"
+  else
+    echo "❌ $dep manquant"
+  fi
+done
+
+echo "=== FIN VALIDATION ==="
+```
+
+### 2. Test d'intégration final
+
+```bash
+# Créer un fichier de test d'intégration temporaire
+cat > test-integration-etape6.ts << 'EOF'
+import type { ExtendedUser, PhotoMarketSession } from './src/types/auth'
+import { signInSchema, isValidUserRole } from './src/lib/auth/validators'
+import { createPermissionChecker } from './src/lib/auth/permissions-utils'
+
+// Test que tous les types sont correctement chargés
+console.log('✅ Types chargés avec succès')
+
+// Test des validateurs
+const testData = { email: 'test@example.com', password: 'Test123!' }
+const result = signInSchema.safeParse(testData)
+console.log('✅ Validateurs Zod fonctionnels:', result.success)
+
+// Test des type guards
+console.log('✅ Type guards fonctionnels:', isValidUserRole('USER'))
+
+console.log('🎉 Intégration Étape 6 réussie !')
 EOF
 
-# Générer la documentation
-npx typedoc
+# Exécuter le test d'intégration
+npx ts-node test-integration-etape6.ts
 
-# Voir la documentation générée
-ls -la docs/types/
+# Nettoyer le fichier temporaire
+rm test-integration-etape6.ts
 ```
 
-## Commandes de diagnostic et debug
+## Commandes d'urgence (en cas de problème)
 
-### Diagnostic complet des types
+### 1. Restauration rapide
 
 ```bash
-# Créer un script de diagnostic complet
-cat > diagnostic-types.js << 'EOF'
-const fs = require('fs')
-const path = require('path')
+# Sauvegarder l'état actuel
+tar -czf etape6-backup.tar.gz src/types/ src/lib/auth/ tsconfig.json package.json
 
-console.log('=== DIAGNOSTIC COMPLET DES TYPES ===\n')
-
-// 1. Vérifier la présence des fichiers de types
-const typeFiles = [
-  'src/types/auth/index.ts',
-  'src/types/auth/session.ts',
-  'src/types/auth/user.ts',
-  'src/types/auth/providers.ts',
-  'src/types/auth/callbacks.ts',
-  'src/types/auth/middleware.ts',
-  'src/types/auth/forms.ts',
-  'src/types/utils/branded-types.ts',
-  'src/lib/auth/validators.ts',
-  'src/lib/auth/type-guards.ts',
-  'src/lib/auth/permissions-utils.ts'
-]
-
-console.log('1. Fichiers de types:')
-typeFiles.forEach(file => {
-  const exists = fs.existsSync(file)
-  console.log(`   ${exists ? '✅' : '❌'} ${file}`)
-})
-
-// 2. Vérifier la configuration TypeScript
-console.log('\n2. Configuration TypeScript:')
-const tsconfigExists = fs.existsSync('tsconfig.json')
-console.log(`   ${tsconfigExists ? '✅' : '❌'} tsconfig.json`)
-
-if (tsconfigExists) {
-  try {
-    const tsconfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf8'))
-    console.log(`   ✅ strict: ${tsconfig.compilerOptions?.strict}`)
-    console.log(`   ✅ noUncheckedIndexedAccess: ${tsconfig.compilerOptions?.noUncheckedIndexedAccess}`)
-    console.log(`   ✅ exactOptionalPropertyTypes: ${tsconfig.compilerOptions?.exactOptionalPropertyTypes}`)
-  } catch (error) {
-    console.log(`   ❌ Erreur lecture tsconfig: ${error.message}`)
-  }
-}
-
-// 3. Vérifier les dépendances
-console.log('\n3. Dépendances:')
-try {
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-  const deps = { ...packageJson.dependencies, ...packageJson.devDependencies }
-  
-  const requiredDeps = ['zod', 'validator', 'vitest', '@types/node']
-  requiredDeps.forEach(dep => {
-    console.log(`   ${deps[dep] ? '✅' : '❌'} ${dep}: ${deps[dep] || 'non installé'}`)
-  })
-} catch (error) {
-  console.log(`   ❌ Erreur lecture package.json: ${error.message}`)
-}
-
-// 4. Vérifier les tests
-console.log('\n4. Tests:')
-const testFiles = [
-  'src/types/__tests__/auth-types.test.ts',
-  'vite.config.ts'
-]
-
-testFiles.forEach(file => {
-  const exists = fs.existsSync(file)
-  console.log(`   ${exists ? '✅' : '❌'} ${file}`)
-})
-
-// 5. Statistiques des fichiers
-console.log('\n5. Statistiques:')
-const countLinesInFile = (filePath) => {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8')
-    return content.split('\n').length
-  } catch {
-    return 0
-  }
-}
-
-const existingFiles = typeFiles.filter(f => fs.existsSync(f))
-const totalLines = existingFiles.reduce((sum, file) => sum + countLinesInFile(file), 0)
-
-console.log(`   📁 Fichiers de types: ${existingFiles.length}/${typeFiles.length}`)
-console.log(`   📄 Lignes de code total: ${totalLines}`)
-
-console.log('\n=== DIAGNOSTIC TERMINÉ ===')
-EOF
-
-node diagnostic-types.js
-rm diagnostic-types.js
+# En cas de problème, restaurer :
+# tar -xzf etape6-backup.tar.gz
 ```
 
-### Debug des imports TypeScript
+### 2. Réinitialisation complète de l'étape 6
 
 ```bash
-# Tester les imports TypeScript
-node -e "
-const { execSync } = require('child_process');
+# ATTENTION : Ceci supprime TOUT le travail de l'étape 6
+echo "⚠️ RÉINITIALISATION COMPLÈTE ÉTAPE 6"
+read -p "Êtes-vous sûr ? (oui/non): " confirm
 
-console.log('=== TEST IMPORTS TYPESCRIPT ===');
-
-try {
-  // Test compilation simple
-  execSync('npx tsc --noEmit --skipLibCheck', { stdio: 'pipe' });
-  console.log('✅ Compilation TypeScript réussie');
-} catch (error) {
-  console.log('❌ Erreurs de compilation TypeScript:');
-  console.log(error.stdout?.toString() || error.message);
-}
-
-try {
-  // Test imports Next.js
-  execSync('npx next build --dry-run', { stdio: 'pipe' });
-  console.log('✅ Build Next.js réussi');
-} catch (error) {
-  console.log('⚠️ Avertissement build Next.js (normal en développement)');
-}
-
-console.log('=== TEST IMPORTS TERMINÉ ===');
-"
+if [ "$confirm" = "oui" ]; then
+  rm -rf src/types/auth/
+  rm -rf src/lib/auth/type-guards.ts
+  rm -rf src/lib/auth/validators.ts  
+  rm -rf src/lib/auth/permissions-utils.ts
+  echo "Étape 6 réinitialisée. Recommencez depuis le début."
+else
+  echo "Réinitialisation annulée."
+fi
 ```
 
-## Annexe 1 : Commandes PowerShell (Windows)
+## Résumé des commandes essentielles
 
-### Installation PowerShell
-
-```powershell
-# Installation des dépendances
+**Installation** :
+```bash
 npm install zod validator
 npm install -D @types/zod @types/validator vitest @vitest/ui @types/node
-
-# Création de la structure de dossiers
-$folders = @(
-    "src\types\auth",
-    "src\types\database", 
-    "src\types\api",
-    "src\types\utils",
-    "src\lib\auth",
-    "src\lib\types",
-    "src\types\__tests__"
-)
-
-foreach ($folder in $folders) {
-    New-Item -ItemType Directory -Path $folder -Force
-    Write-Host "✅ Créé: $folder" -ForegroundColor Green
-}
-
-# Création des fichiers de types
-$typeFiles = @(
-    "src\types\auth\index.ts",
-    "src\types\auth\session.ts",
-    "src\types\auth\user.ts",
-    "src\types\auth\providers.ts",
-    "src\types\auth\callbacks.ts",
-    "src\types\auth\middleware.ts",
-    "src\types\auth\forms.ts",
-    "src\types\utils\branded-types.ts",
-    "src\lib\auth\validators.ts",
-    "src\lib\auth\type-guards.ts",
-    "src\lib\auth\permissions-utils.ts"
-)
-
-foreach ($file in $typeFiles) {
-    New-Item -ItemType File -Path $file -Force
-    Write-Host "✅ Créé: $file" -ForegroundColor Green
-}
 ```
 
-### Tests PowerShell
-
-```powershell
-# Fonction de test TypeScript
-function Test-TypeScriptSetup {
-    Write-Host "=== TEST TYPESCRIPT SETUP ===" -ForegroundColor Blue
-    
-    # Test compilation TypeScript
-    try {
-        $result = npx tsc --noEmit 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "✅ Compilation TypeScript réussie" -ForegroundColor Green
-        } else {
-            Write-Host "❌ Erreurs de compilation:" -ForegroundColor Red
-            Write-Host $result -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Host "❌ Erreur lors de la compilation: $_" -ForegroundColor Red
-    }
-    
-    # Test Zod
-    try {
-        $testZod = 'const { z } = require("zod"); console.log("Zod version:", z.version || "OK");'
-        $zodResult = node -e $testZod
-        Write-Host "✅ Zod: $zodResult" -ForegroundColor Green
-    } catch {
-        Write-Host "❌ Erreur Zod: $_" -ForegroundColor Red
-    }
-    
-    # Test structure des fichiers
-    Write-Host "`n📁 Structure des types:" -ForegroundColor Yellow
-    Get-ChildItem -Path "src\types" -Recurse -File | ForEach-Object {
-        Write-Host "   $($_.FullName)" -ForegroundColor Gray
-    }
-}
-
-# Fonction de test des permissions
-function Test-PermissionsSystem {
-    $testScript = @"
-function calculateUserPermissions(role, status) {
-    const base = { canUploadPhotos: false, canPurchasePhotos: false, canAccessAdmin: false };
-    if (status !== 'ACTIVE') return base;
-    if (role === 'USER') { base.canUploadPhotos = true; base.canPurchasePhotos = true; }
-    if (role === 'ADMIN') return { canUploadPhotos: true, canPurchasePhotos: true, canAccessAdmin: true };
-    return base;
-}
-
-const userPerms = calculateUserPermissions('USER', 'ACTIVE');
-const adminPerms = calculateUserPermissions('ADMIN', 'ACTIVE');
-const suspendedPerms = calculateUserPermissions('USER', 'SUSPENDED');
-
-console.log('USER peut uploader:', userPerms.canUploadPhotos);
-console.log('ADMIN peut administrer:', adminPerms.canAccessAdmin);
-console.log('SUSPENDED peut uploader:', suspendedPerms.canUploadPhotos);
-"@
-    
-    $testScript | Out-File -FilePath "test-perms.js" -Encoding UTF8
-    node test-perms.js
-    Remove-Item test-perms.js
-}
-
-Write-Host "Fonctions PowerShell disponibles:" -ForegroundColor Cyan
-Write-Host "- Test-TypeScriptSetup" -ForegroundColor White
-Write-Host "- Test-PermissionsSystem" -ForegroundColor White
-```
-
-## Annexe 2 : Commandes CMD (Command Prompt)
-
-### Installation CMD
-
-```cmd
-REM Installation des dépendances
-npm install zod validator
-npm install -D @types/zod @types/validator vitest @vitest/ui @types/node
-
-REM Vérification des installations
-npm list zod validator vitest
-
-REM Création de la structure
-mkdir src\types\auth
-mkdir src\types\database
-mkdir src\types\api
-mkdir src\types\utils
-mkdir src\lib\auth
-mkdir src\lib\types
-mkdir src\types\__tests__
-
-echo Structure créée avec succès
-```
-
-### Script de test complet CMD
-
-```cmd
-REM test-types-complete.bat
-@echo off
-echo === TEST COMPLET TYPES NEXTAUTH ===
-
-echo 1. Test compilation TypeScript...
-npx tsc --noEmit >nul 2>&1
-if %errorlevel% == 0 (
-    echo ✅ Compilation TypeScript OK
-) else (
-    echo ❌ Erreurs de compilation TypeScript
-)
-
-echo.
-echo 2. Test Zod...
-node -e "try{require('zod');console.log('✅ Zod OK')}catch{console.log('❌ Zod manquant')}"
-
-echo.
-echo 3. Test Validator...
-node -e "try{require('validator');console.log('✅ Validator OK')}catch{console.log('❌ Validator manquant')}"
-
-echo.
-echo 4. Test Vitest...
-npm list vitest >nul 2>&1
-if %errorlevel% == 0 (
-    echo ✅ Vitest installé
-) else (
-    echo ❌ Vitest manquant
-)
-
-echo.
-echo 5. Structure des types...
-if exist "src\types\auth" (
-    echo ✅ Dossier auth existant
-) else (
-    echo ❌ Dossier auth manquant
-)
-
-if exist "src\lib\auth" (
-    echo ✅ Dossier lib/auth existant
-) else (
-    echo ❌ Dossier lib/auth manquant
-)
-
-echo.
-echo 6. Test rapide des types...
-echo const role = 'USER'; const isValid = ['USER', 'ADMIN'].includes(role); console.log('Type guard OK:', isValid); > test-quick.js
-node test-quick.js
-del test-quick.js
-
-echo.
-echo === TESTS TERMINÉS ===
-pause
-```
-
-## Commandes de déploiement
-
-### Préparation pour la production
-
+**Structure** :
 ```bash
-# Build avec vérification des types
-npm run build
+mkdir -p src/types/auth src/lib/auth src/types/__tests__
+```
 
-# Vérification finale des types
-npx tsc --noEmit --strict
-
-# Génération de la documentation des types
-npx typedoc
-
-# Tests finaux
+**Validation** :
+```bash
+npx tsc --noEmit
 npm run test:types
-
-# Vérification de la taille du bundle
-npx next build --debug
 ```
 
-Cette documentation complète des commandes vous permet de configurer, tester et maintenir efficacement tous les types TypeScript avancés pour NextAuth.js dans PhotoMarket.
+**Vérification finale** :
+```bash
+find src/types -name "*.ts" | wc -l  # Doit être 13+
+npx tsc --noEmit                      # Aucune erreur
+npm run test:types                    # Tests passent
+```
+
+Ces commandes couvrent l'intégralité du processus de l'Étape 6. Exécutez-les dans l'ordre pour une installation sans problème.
